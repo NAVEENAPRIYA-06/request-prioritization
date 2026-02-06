@@ -28,7 +28,7 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify(response.data.user));
       
       // Navigate to dashboard (we will create this route next)
-      // navigate('/dashboard'); 
+      navigate('/dashboard'); 
       
     } catch (err) {
       // Show specific error message from backend or a default one
