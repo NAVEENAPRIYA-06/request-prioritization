@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import { 
   LayoutDashboard, 
   ClipboardList, 
@@ -13,15 +13,22 @@ import {
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+  const [stats, setStats] = useState({ total: 0, pending: 0, resolved: 0, highPriority: 0 });
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is logged in
+    // 1. Check if user is logged in
     const loggedInUser = localStorage.getItem('user');
     if (!loggedInUser) {
       navigate('/login');
     } else {
-      setUser(JSON.parse(loggedInUser));
+      const parsedUser = JSON.parse(loggedInUser);
+      setUser(parsedUser);
+
+      // 2. Fetch real stats from the database
+      axios.get(`http://localhost:5000/api/requests/stats/${parsedUser.id}`)
+        .then(res => setStats(res.data))
+        .catch(err => console.error("Error fetching dashboard stats:", err));
     }
   }, [navigate]);
 
@@ -41,30 +48,30 @@ const Dashboard = () => {
         </div>
         
         <nav className="flex-1 p-4 space-y-2">
-          <button className="flex items-center w-full p-3 space-x-3 bg-pink-500 rounded-xl">
+          {/* Dashboard Home Link */}
+          <Link to="/dashboard" className="flex items-center w-full p-3 space-x-3 bg-pink-500 rounded-xl">
             <LayoutDashboard size={20} />
-            <span>Dashboard</span>
-          </button>
-          <button className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition">
-            <ClipboardList size={20} />
-            <span>My Requests</span>
-          </button>
-          <button className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition">
-               
-  <Link 
-    to="/new-request" 
-    className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white"
-  >
-    <PlusCircle size={20}  />
-    <span>New Request</span>
-  </Link>
+            <span className="text-base font-medium">Dashboard</span>
+          </Link>
 
-          </button>
+          {/* My Requests Link */}
+          <Link to="/my-requests" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white">
+            <ClipboardList size={20} />
+            <span className="text-base font-medium">My Requests</span>
+          </Link>
+
+          {/* New Request Link (Perfectly Aligned) */}
+          <Link to="/new-request" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white">
+            <PlusCircle size={20} className="ml-0.5" />
+            <span className="text-base font-medium">New Request</span>
+          </Link>
+
+          {/* Admin Reports (Only visible if user role is admin) */}
           {user.role === 'admin' && (
-            <button className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition">
+            <Link to="/admin-panel" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white">
               <BarChart3 size={20} />
-              <span>Admin Reports</span>
-            </button>
+              <span className="text-base font-medium">Admin Panel</span>
+            </Link>
           )}
         </nav>
 
@@ -74,14 +81,14 @@ const Dashboard = () => {
             className="flex items-center w-full p-3 space-x-3 hover:bg-red-900/30 text-red-400 rounded-xl transition"
           >
             <LogOut size={20} />
-            <span>Logout</span>
+            <span className="text-base font-medium">Logout</span>
           </button>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
+        {/* Top Header */}
         <header className="h-16 bg-white border-b flex items-center justify-between px-8">
           <h2 className="text-xl font-semibold text-gray-800">Welcome, {user.name}!</h2>
           <div className="flex items-center space-x-4">
@@ -95,19 +102,18 @@ const Dashboard = () => {
           </div>
         </header>
 
-        {/* Dashboard Content */}
+        {/* Dynamic Data Content */}
         <main className="flex-1 overflow-y-auto p-8">
-          {/* Stat Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatCard title="Total Requests" value="0" color="bg-blue-500" />
-            <StatCard title="Pending" value="0" color="bg-yellow-500" />
-            <StatCard title="Resolved" value="0" color="bg-green-500" />
-            <StatCard title="High Priority" value="0" color="bg-red-500" />
+            <StatCard title="Total Requests" value={stats.total} color="bg-blue-500" />
+            <StatCard title="Pending" value={stats.pending} color="bg-yellow-500" />
+            <StatCard title="Resolved" value={stats.resolved} color="bg-green-500" />
+            <StatCard title="High Priority" value={stats.highPriority} color="bg-red-500" />
           </div>
 
-          {/* Placeholder for Charts */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border h-64 flex items-center justify-center text-gray-400">
-            Chart.js visualization will go here...
+          <div className="bg-white p-6 rounded-2xl shadow-sm border h-64 flex flex-col items-center justify-center text-gray-400">
+             <BarChart3 size={40} className="mb-4 opacity-20" />
+             <p>Chart.js visualization will appear here once analytics are connected.</p>
           </div>
         </main>
       </div>
@@ -115,9 +121,9 @@ const Dashboard = () => {
   );
 };
 
-// Simple StatCard component
+// Reusable Stat Card Component
 const StatCard = ({ title, value, color }) => (
-  <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+  <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transform transition hover:scale-105">
     <div className="flex items-center justify-between mb-4">
       <h3 className="text-gray-500 text-sm font-medium">{title}</h3>
       <div className={`w-2 h-2 rounded-full ${color}`}></div>
