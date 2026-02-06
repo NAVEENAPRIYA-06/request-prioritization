@@ -50,11 +50,15 @@ const Dashboard = () => {
             <span>My Requests</span>
           </button>
           <button className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition">
-            <PlusCircle size={20} />
-           <Link to="/new-request" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition">
-  <PlusCircle size={20} />
-  <span>New Request</span>
-</Link>
+               
+  <Link 
+    to="/new-request" 
+    className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white"
+  >
+    <PlusCircle size={20}  />
+    <span>New Request</span>
+  </Link>
+
           </button>
           {user.role === 'admin' && (
             <button className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition">
