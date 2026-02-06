@@ -1,11 +1,17 @@
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+
+// Import Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import NewRequest from './pages/NewRequest';
 import MyRequests from './pages/MyRequests';
 import AdminPanel from './pages/AdminPanel';
+import Profile from './pages/Profile'; // New Import
+
+// Import Components
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -29,12 +35,20 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Secured Employee Routes */}
+        {/* Secured General Routes */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
         } />
+        
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+
+        {/* Secured Employee Only Routes */}
         <Route path="/new-request" element={
           <ProtectedRoute>
             <NewRequest />
@@ -46,7 +60,7 @@ function App() {
           </ProtectedRoute>
         } />
 
-        {/* Secured Admin Route - Uses allowAdminOnly to match ProtectedRoute logic */}
+        {/* Secured Admin Only Route */}
         <Route path="/admin-panel" element={
           <ProtectedRoute allowAdminOnly={true}>
             <AdminPanel />

@@ -8,8 +8,8 @@ import {
   LogOut, 
   User, 
   Bell,
-  BarChart3,
-  ShieldCheck
+  ShieldCheck,
+  Settings
 } from 'lucide-react';
 import RequestChart from '../components/RequestChart';
 
@@ -25,11 +25,9 @@ const Dashboard = () => {
     } else {
       const parsedUser = JSON.parse(loggedInUser);
       setUser(parsedUser);
-
-      // Fetch stats based on Role (Admin gets all, Employee gets personal)
       axios.get(`http://localhost:5000/api/requests/stats/${parsedUser.id}/${parsedUser.role}`)
         .then(res => setStats(res.data))
-        .catch(err => console.error("Error fetching dashboard stats:", err));
+        .catch(err => console.error(err));
     }
   }, [navigate]);
 
@@ -40,102 +38,88 @@ const Dashboard = () => {
 
   if (!user) return null;
 
-  // Determine theme based on role
   const isAdmin = user.role === 'admin';
-  const sidebarBg = isAdmin ? 'bg-[#1e293b]' : 'bg-[#1e2330]'; // Deep Navy for Admin
-  const accentColor = isAdmin ? 'text-blue-400' : 'text-pink-500';
-  const activeBtn = isAdmin ? 'bg-blue-600' : 'bg-pink-500';
+  
+  // NEW THEME COLOR VARIABLES
+  // Admin: Ocean/Azure Blue Profile
+  // Employee: Plum Profile
+  const sidebarBg = isAdmin ? 'bg-[#0077be]' : 'bg-[#8e4585]'; // Azure vs Plum
+  const activeBtn = isAdmin ? 'bg-[#005a92]' : 'bg-[#72376a]'; // Darker shades for active state
+  const accentColor = isAdmin ? 'text-blue-100' : 'text-purple-100';
+  const iconBg = isAdmin ? 'bg-blue-50 text-[#0077be]' : 'bg-purple-50 text-[#8e4585]';
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
-      <div className={`w-64 ${sidebarBg} text-white flex flex-col transition-colors duration-500`}>
-        <div className="p-6 text-center border-b border-gray-700/50">
-          <h1 className={`text-xl font-bold tracking-widest ${accentColor}`}>
+      <div className={`w-64 ${sidebarBg} text-white flex flex-col shadow-2xl transition-all duration-500`}>
+        <div className="p-8 text-center border-b border-white/10">
+          <h1 className="text-2xl font-black tracking-tighter italic">
             {isAdmin ? 'AdminHub' : 'RequestHub'}
           </h1>
         </div>
         
-        <nav className="flex-1 p-4 space-y-2">
-          <Link to="/dashboard" className={`flex items-center w-full p-3 space-x-3 ${activeBtn} rounded-xl`}>
+        <nav className="flex-1 p-4 space-y-2 mt-4">
+          <Link to="/dashboard" className={`flex items-center w-full p-3.5 space-x-3 ${activeBtn} rounded-2xl shadow-lg`}>
             <LayoutDashboard size={20} />
-            <span className="text-base font-medium">Dashboard</span>
+            <span className="text-xs font-bold uppercase tracking-widest">Dashboard</span>
           </Link>
 
           {!isAdmin && (
             <>
-              <Link to="/my-requests" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white">
-                <ClipboardList size={20} />
-                <span className="text-base font-medium">My Requests</span>
-              </Link>
-
-              <Link to="/new-request" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white">
-                <PlusCircle size={20} className="ml-0.5" />
-                <span className="text-base font-medium">New Request</span>
-              </Link>
+              <NavLink to="/my-requests" icon={<ClipboardList size={20} />} label="My Requests" />
+              <NavLink to="/new-request" icon={<PlusCircle size={20} />} label="New Request" />
             </>
           )}
 
           {isAdmin && (
-            <Link to="/admin-panel" className="flex items-center w-full p-3 space-x-3 hover:bg-blue-900/30 rounded-xl transition text-blue-100 hover:text-white border border-blue-500/20">
-              <ShieldCheck size={20} />
-              <span className="text-base font-medium">Admin Control</span>
-            </Link>
+            <NavLink to="/admin-panel" icon={<ShieldCheck size={20} />} label="System Admin" />
           )}
+
+          <NavLink to="/profile" icon={<Settings size={20} />} label="Settings" />
         </nav>
 
-        <div className="p-4 border-t border-gray-700/50">
-          <button 
-            onClick={handleLogout}
-            className="flex items-center w-full p-3 space-x-3 hover:bg-red-900/30 text-red-400 rounded-xl transition"
-          >
+        <div className="p-4 border-t border-white/10">
+          <button onClick={handleLogout} className="flex items-center w-full p-3.5 space-x-3 text-white/70 hover:text-white rounded-2xl transition-all font-bold text-xs uppercase tracking-widest">
             <LogOut size={20} />
-            <span className="text-base font-medium">Logout</span>
+            <span>Sign Out</span>
           </button>
         </div>
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header */}
-        <header className="h-16 bg-white border-b flex items-center justify-between px-8">
-          <div className="flex items-center space-x-2">
-            {isAdmin && <ShieldCheck className="text-blue-600" size={20} />}
-            <h2 className="text-xl font-semibold text-gray-800">
-              {isAdmin ? "Company Overview" : `Welcome, ${user.name}!`}
+        <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Corporate Portal</span>
+            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+              {isAdmin ? "Global Monitoring" : `Hello, ${user.name.split(' ')[0]}`}
             </h2>
           </div>
           
-          <div className="flex items-center space-x-4">
-            <Bell className="text-gray-400 cursor-pointer hover:text-gray-600" />
-            <div className="flex items-center space-x-2 border-l pl-4">
-              <div className="text-right hidden sm:block">
-                <p className="text-xs font-bold text-gray-400 uppercase leading-none mb-1">{user.role}</p>
-                <p className="text-sm font-medium text-gray-700 leading-none">{user.name}</p>
+          <div className="flex items-center space-x-6">
+            <Bell className="text-slate-300 hover:text-slate-500 cursor-pointer" size={22} />
+            <Link to="/profile" className="flex items-center space-x-3 pl-6 border-l border-slate-200 group">
+              <div className="text-right">
+                <p className="text-[10px] font-black text-slate-300 uppercase leading-none mb-1">{user.role}</p>
+                <p className={`text-sm font-bold text-slate-700 group-hover:${isAdmin ? 'text-blue-600' : 'text-purple-700'} transition`}>{user.name}</p>
               </div>
-              <div className={`w-10 h-10 ${isAdmin ? 'bg-blue-100 text-blue-600' : 'bg-pink-100 text-pink-600'} rounded-full flex items-center justify-center`}>
-                <User size={20} />
+              <div className={`w-11 h-11 ${iconBg} rounded-2xl flex items-center justify-center shadow-inner`}>
+                <User size={22} />
               </div>
-            </div>
+            </Link>
           </div>
         </header>
 
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto p-8">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatCard title={isAdmin ? "Total Company Requests" : "My Total Requests"} value={stats.total} color="bg-blue-500" />
-            <StatCard title="Pending Review" value={stats.pending} color="bg-yellow-500" />
-            <StatCard title="Successfully Resolved" value={stats.resolved} color="bg-green-500" />
-            <StatCard title="Urgent/Critical" value={stats.highPriority} color="bg-red-500" />
+        <main className="flex-1 overflow-y-auto p-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+            <StatCard title="Volume" value={stats.total} dotColor={isAdmin ? "bg-blue-400" : "bg-purple-400"} />
+            <StatCard title="Pending" value={stats.pending} dotColor="bg-amber-400" />
+            <StatCard title="Resolved" value={stats.resolved} dotColor="bg-emerald-400" />
+            <StatCard title="Urgent" value={stats.highPriority} dotColor="bg-rose-400" />
           </div>
 
-          {/* Analytics Chart */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border h-96">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              {isAdmin ? "Company-Wide Analytics" : "Personal Request Trends"}
-            </h3>
-            <p className="text-sm text-gray-400 mb-6">Visual representation of request status and priority</p>
+          <div className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 h-[28rem]">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-8">System Analytics</h3>
             <div className="h-64">
               <RequestChart stats={stats} />
             </div>
@@ -146,13 +130,20 @@ const Dashboard = () => {
   );
 };
 
-const StatCard = ({ title, value, color }) => (
-  <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+const NavLink = ({ to, icon, label }) => (
+  <Link to={to} className="flex items-center w-full p-3.5 space-x-3 text-white/60 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+    {icon}
+    <span className="text-xs font-bold uppercase tracking-widest">{label}</span>
+  </Link>
+);
+
+const StatCard = ({ title, value, dotColor }) => (
+  <div className="bg-white p-7 rounded-[2rem] shadow-sm border border-slate-100 hover:translate-y-[-4px] transition-transform duration-300">
     <div className="flex items-center justify-between mb-4">
-      <h3 className="text-gray-400 text-xs font-bold uppercase tracking-wider">{title}</h3>
-      <div className={`w-2 h-2 rounded-full ${color}`}></div>
+      <h3 className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{title}</h3>
+      <div className={`w-2 h-2 rounded-full ${dotColor}`}></div>
     </div>
-    <p className="text-3xl font-extrabold text-gray-800">{value}</p>
+    <p className="text-4xl font-black text-slate-800 tracking-tighter">{value}</p>
   </div>
 );
 

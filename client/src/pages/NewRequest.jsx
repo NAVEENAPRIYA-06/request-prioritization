@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const NewRequest = () => {
@@ -17,57 +17,53 @@ const NewRequest = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Simple Validation
     if (formData.description.length < 10) {
-      return toast.error("Please provide a more detailed description (min 10 chars).");
+      return toast.error("Please provide a more detailed description.");
     }
 
     setLoading(true);
     try {
       await axios.post('http://localhost:5000/api/requests/create', { ...formData, userId: user.id });
-      toast.success("Request submitted successfully!");
+      toast.success("Request submitted to the priority queue.");
       navigate('/dashboard');
     } catch (err) {
-      toast.error("Failed to submit request. Please try again.");
+      toast.error("Failed to submit request.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-xl p-10 relative border border-gray-100">
-        {/* Floating Back Arrow */}
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+      <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-xl shadow-slate-200/50 p-10 relative border border-slate-100">
         <button 
           onClick={() => navigate('/dashboard')} 
-          className="absolute left-6 top-8 p-2 rounded-full hover:bg-gray-100 text-gray-400 transition-all border border-transparent hover:border-gray-200"
+          className="absolute left-8 top-10 p-2 rounded-full hover:bg-slate-50 text-slate-400 transition-all"
         >
           <ArrowLeft size={20} />
         </button>
 
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">Create New Request</h2>
-          <p className="text-gray-400 mt-2 text-sm">Please be as descriptive as possible to help our team prioritize.</p>
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-black text-slate-800 tracking-tighter">New Service Request</h2>
+          <p className="text-slate-400 mt-2 text-[10px] font-black uppercase tracking-[0.2em]">Queue Submission</p>
         </div>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Request Title</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Request Title</label>
               <input 
                 type="text" 
                 required 
-                placeholder="Brief summary of the issue"
-                className="w-full px-5 py-3 rounded-xl border bg-gray-50 focus:bg-white focus:ring-2 focus:ring-pink-400 outline-none transition"
+                className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-purple-50 focus:border-[#8e4585] outline-none transition-all font-bold text-slate-700"
                 onChange={(e) => setFormData({...formData, title: e.target.value})} 
               />
             </div>
             
             <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Category</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Category</label>
               <select 
-                className="w-full px-5 py-3 rounded-xl border bg-gray-50 focus:bg-white outline-none appearance-none" 
+                className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white outline-none appearance-none font-bold text-slate-700" 
                 onChange={(e) => setFormData({...formData, category: e.target.value})}
               >
                 <option>Technical</option>
@@ -79,17 +75,17 @@ const NewRequest = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Priority Level</label>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Priority Level</label>
             <div className="grid grid-cols-4 gap-3">
               {['Low', 'Medium', 'High', 'Critical'].map((p) => (
                 <button 
                   key={p} 
                   type="button" 
                   onClick={() => setFormData({...formData, priority: p})}
-                  className={`py-2 rounded-lg border text-xs font-bold transition-all ${
+                  className={`py-3 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${
                     formData.priority === p 
-                    ? 'bg-pink-500 text-white border-pink-500 shadow-md transform scale-105' 
-                    : 'bg-white text-gray-500 hover:border-pink-200'
+                    ? 'bg-[#8e4585] text-white border-[#8e4585] shadow-lg shadow-purple-100 transform scale-105' 
+                    : 'bg-white text-slate-400 hover:border-purple-200'
                   }`}
                 >
                   {p}
@@ -99,17 +95,11 @@ const NewRequest = () => {
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest">Full Description</label>
-              <span className={`text-[10px] font-bold ${formData.description.length < 10 ? 'text-red-400' : 'text-green-400'}`}>
-                {formData.description.length} Characters
-              </span>
-            </div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Full Description</label>
             <textarea 
               rows="4" 
               required
-              placeholder="Describe the problem, steps to reproduce, and impact..."
-              className="w-full px-5 py-3 rounded-xl border bg-gray-50 focus:bg-white focus:ring-2 focus:ring-pink-400 outline-none transition resize-none"
+              className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-purple-50 focus:border-[#8e4585] outline-none transition-all resize-none font-medium text-slate-600"
               onChange={(e) => setFormData({...formData, description: e.target.value})}
             ></textarea>
           </div>
@@ -117,14 +107,10 @@ const NewRequest = () => {
           <button 
             type="submit" 
             disabled={loading}
-            className={`w-full py-4 ${loading ? 'bg-gray-400' : 'bg-[#d16b7a] hover:bg-[#b05a68]'} text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center space-x-2`}
+            className={`w-full py-5 ${loading ? 'bg-slate-300' : 'bg-[#8e4585] hover:bg-[#72376a]'} text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-purple-100 transition-all transform hover:scale-[1.01] flex items-center justify-center space-x-3`}
           >
-            {loading ? <span>Processing...</span> : (
-              <>
-                <Send size={18} />
-                <span>Submit</span>
-              </>
-            )}
+            <Send size={18} />
+            <span>{loading ? 'Processing...' : 'Submit to Queue'}</span>
           </button>
         </form>
       </div>
