@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { Eye, EyeOff, User, Mail, Lock, ShieldCheck } from 'lucide-react';
 
@@ -54,7 +55,7 @@ const Register = () => {
             </form>
 
             <p className="mt-6 text-center text-sm text-gray-500">
-              Already a member? <span className="text-pink-600 font-bold cursor-pointer">Login</span>
+              Already a member? <Link to="/login" className="text-pink-600 font-bold hover:underline cursor-pointer">Login</Link>
             </p>
           </div>
         </div>
