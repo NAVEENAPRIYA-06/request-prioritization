@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   ClipboardList, 
@@ -50,7 +51,10 @@ const Dashboard = () => {
           </button>
           <button className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition">
             <PlusCircle size={20} />
-            <span>New Request</span>
+           <Link to="/new-request" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition">
+  <PlusCircle size={20} />
+  <span>New Request</span>
+</Link>
           </button>
           {user.role === 'admin' && (
             <button className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition">
