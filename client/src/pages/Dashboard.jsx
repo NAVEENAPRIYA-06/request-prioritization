@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import RequestChart from '../components/RequestChart';
 import { 
   LayoutDashboard, 
   ClipboardList, 
@@ -111,10 +112,12 @@ const Dashboard = () => {
             <StatCard title="High Priority" value={stats.highPriority} color="bg-red-500" />
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-sm border h-64 flex flex-col items-center justify-center text-gray-400">
-             <BarChart3 size={40} className="mb-4 opacity-20" />
-             <p>Chart.js visualization will appear here once analytics are connected.</p>
-          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border h-80">
+  <h3 className="text-lg font-semibold text-gray-800 mb-4">Request Analytics</h3>
+  <div className="h-64">
+    <RequestChart stats={stats} />
+  </div>
+</div>
         </main>
       </div>
     </div>
