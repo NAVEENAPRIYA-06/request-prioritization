@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Shield, RefreshCcw } from 'lucide-react';
+import { Shield } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const AdminPanel = () => {
   const [allRequests, setAllRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   const fetchAllData = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/requests/admin/all');
       setAllRequests(res.data);
-      setLoading(false);
     } catch (err) {
       console.error(err);
     }
@@ -21,9 +20,10 @@ const AdminPanel = () => {
   const handleStatusChange = async (id, newStatus) => {
     try {
       await axios.put(`http://localhost:5000/api/requests/update-status/${id}`, { status: newStatus });
-      fetchAllData(); // Refresh table
+      toast.success(`Request status updated to ${newStatus}`);
+      fetchAllData();
     } catch (err) {
-      alert("Failed to update status");
+      toast.error("Failed to update status");
     }
   };
 
@@ -37,7 +37,6 @@ const AdminPanel = () => {
           </div>
           <Shield size={40} className="text-pink-500 opacity-20" />
         </div>
-
         <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
           <table className="w-full text-left">
             <thead className="bg-gray-50 border-b text-gray-600">
@@ -59,15 +58,10 @@ const AdminPanel = () => {
                       {req.priority}
                     </span>
                   </td>
-                  <td className="p-4">
-                    <span className="text-sm text-gray-500">{req.status}</span>
-                  </td>
+                  <td className="p-4 text-sm text-gray-500">{req.status}</td>
                   <td className="p-4 text-center">
-                    <select 
-                      value={req.status}
-                      onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                      className="bg-white border rounded-lg px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-pink-400"
-                    >
+                    <select value={req.status} onChange={(e) => handleStatusChange(req.id, e.target.value)}
+                      className="bg-white border rounded-lg px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-pink-400">
                       <option value="Pending">Pending</option>
                       <option value="In Progress">In Progress</option>
                       <option value="Resolved">Resolved</option>
