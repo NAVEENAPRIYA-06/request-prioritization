@@ -45,7 +45,7 @@ const Register = () => {
             <select className="w-full px-5 py-3 rounded-xl border outline-none bg-white text-gray-500" 
               onChange={(e) => setFormData({...formData, role: e.target.value})}>
               <option value="employee">Join as Employee</option>
-              <option value="admin">Join as Admin (Manager)</option>
+             
             </select>
             <button type="submit" className="w-full py-4 bg-[#d16b7a] text-white font-bold rounded-xl shadow-lg hover:bg-[#b05a68] transition-transform hover:scale-[1.02]">
               Get Started

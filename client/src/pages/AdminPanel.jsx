@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Shield } from 'lucide-react';
+import { Shield, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const AdminPanel = () => {
   const [allRequests, setAllRequests] = useState([]);
+  const navigate = useNavigate();
 
   const fetchAllData = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/requests/admin/all');
-      setAllRequests(res.data);
+      
+      // Priority Algorithm: Sort Critical > High > Medium > Low
+      const priorityOrder = { 'Critical': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
+      const sortedData = res.data.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+      
+      setAllRequests(sortedData);
     } catch (err) {
       console.error(err);
     }
@@ -20,7 +27,7 @@ const AdminPanel = () => {
   const handleStatusChange = async (id, newStatus) => {
     try {
       await axios.put(`http://localhost:5000/api/requests/update-status/${id}`, { status: newStatus });
-      toast.success(`Request status updated to ${newStatus}`);
+      toast.success(`Updated to ${newStatus}`);
       fetchAllData();
     } catch (err) {
       toast.error("Failed to update status");
@@ -31,12 +38,21 @@ const AdminPanel = () => {
     <div className="p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800">Admin Control Center</h2>
-            <p className="text-gray-500">Manage and prioritize all employee requests</p>
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => navigate('/dashboard')} 
+              className="p-2 bg-white rounded-full shadow-sm border hover:bg-gray-50 text-gray-600 transition"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800">Admin Control Center</h2>
+              <p className="text-gray-500 text-sm">Sorted by Priority: Critical items appear first</p>
+            </div>
           </div>
           <Shield size={40} className="text-pink-500 opacity-20" />
         </div>
+
         <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
           <table className="w-full text-left">
             <thead className="bg-gray-50 border-b text-gray-600">
@@ -44,7 +60,7 @@ const AdminPanel = () => {
                 <th className="p-4 font-semibold">Employee</th>
                 <th className="p-4 font-semibold">Request Title</th>
                 <th className="p-4 font-semibold">Priority</th>
-                <th className="p-4 font-semibold">Current Status</th>
+                <th className="p-4 font-semibold">Status</th>
                 <th className="p-4 font-semibold text-center">Action</th>
               </tr>
             </thead>
@@ -58,10 +74,13 @@ const AdminPanel = () => {
                       {req.priority}
                     </span>
                   </td>
-                  <td className="p-4 text-sm text-gray-500">{req.status}</td>
+                  <td className="p-4 text-sm text-gray-500 font-medium">{req.status}</td>
                   <td className="p-4 text-center">
-                    <select value={req.status} onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                      className="bg-white border rounded-lg px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-pink-400">
+                    <select 
+                      value={req.status}
+                      onChange={(e) => handleStatusChange(req.id, e.target.value)}
+                      className="bg-white border rounded-lg px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-pink-400"
+                    >
                       <option value="Pending">Pending</option>
                       <option value="In Progress">In Progress</option>
                       <option value="Resolved">Resolved</option>

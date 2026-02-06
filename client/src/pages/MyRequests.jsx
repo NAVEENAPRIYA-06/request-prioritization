@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import DetailsModal from '../components/DetailsModal';
 
 const MyRequests = () => {
   const [requests, setRequests] = useState([]);
+  const [selectedRequest, setSelectedRequest] = useState(null); // State for modal
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
@@ -20,8 +24,25 @@ const MyRequests = () => {
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
+      {/* Detail Modal Component */}
+      <DetailsModal 
+        request={selectedRequest} 
+        onClose={() => setSelectedRequest(null)} 
+      />
+
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">My Request History</h2>
+        <div className="flex items-center space-x-4 mb-8">
+          <button 
+            onClick={() => navigate('/dashboard')} 
+            className="p-2 bg-white rounded-full shadow-sm border hover:bg-gray-50 text-gray-600 transition"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h2 className="text-3xl font-bold text-gray-800">My Request History</h2>
+            <p className="text-sm text-gray-500">Click on any row to view full details</p>
+          </div>
+        </div>
         
         <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
           <table className="w-full text-left border-collapse">
@@ -32,11 +53,16 @@ const MyRequests = () => {
                 <th className="p-4 font-semibold text-gray-600">Priority</th>
                 <th className="p-4 font-semibold text-gray-600">Status</th>
                 <th className="p-4 font-semibold text-gray-600">Date</th>
+                <th className="p-4 font-semibold text-gray-600 text-center">Action</th>
               </tr>
             </thead>
             <tbody>
               {requests.map((req) => (
-                <tr key={req.id} className="border-b hover:bg-gray-50 transition">
+                <tr 
+                  key={req.id} 
+                  onClick={() => setSelectedRequest(req)}
+                  className="border-b hover:bg-blue-50/50 transition cursor-pointer group"
+                >
                   <td className="p-4 font-medium text-gray-800">{req.title}</td>
                   <td className="p-4 text-gray-600">{req.category}</td>
                   <td className="p-4">
@@ -51,6 +77,11 @@ const MyRequests = () => {
                   </td>
                   <td className="p-4 text-sm text-gray-400">
                     {new Date(req.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="p-4 text-center">
+                    <button className="text-gray-300 group-hover:text-blue-500 transition">
+                      <Info size={18} />
+                    </button>
                   </td>
                 </tr>
               ))}

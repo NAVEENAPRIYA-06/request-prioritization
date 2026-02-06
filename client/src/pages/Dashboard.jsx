@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import RequestChart from '../components/RequestChart';
 import { 
   LayoutDashboard, 
   ClipboardList, 
@@ -9,8 +8,10 @@ import {
   LogOut, 
   User, 
   Bell,
-  BarChart3
+  BarChart3,
+  ShieldCheck
 } from 'lucide-react';
+import RequestChart from '../components/RequestChart';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -18,7 +19,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 1. Check if user is logged in
     const loggedInUser = localStorage.getItem('user');
     if (!loggedInUser) {
       navigate('/login');
@@ -26,8 +26,8 @@ const Dashboard = () => {
       const parsedUser = JSON.parse(loggedInUser);
       setUser(parsedUser);
 
-      // 2. Fetch real stats from the database
-      axios.get(`http://localhost:5000/api/requests/stats/${parsedUser.id}`)
+      // Fetch stats based on Role (Admin gets all, Employee gets personal)
+      axios.get(`http://localhost:5000/api/requests/stats/${parsedUser.id}/${parsedUser.role}`)
         .then(res => setStats(res.data))
         .catch(err => console.error("Error fetching dashboard stats:", err));
     }
@@ -40,46 +40,51 @@ const Dashboard = () => {
 
   if (!user) return null;
 
+  // Determine theme based on role
+  const isAdmin = user.role === 'admin';
+  const sidebarBg = isAdmin ? 'bg-[#1e293b]' : 'bg-[#1e2330]'; // Deep Navy for Admin
+  const accentColor = isAdmin ? 'text-blue-400' : 'text-pink-500';
+  const activeBtn = isAdmin ? 'bg-blue-600' : 'bg-pink-500';
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className="w-64 bg-[#1e2330] text-white flex flex-col">
-        <div className="p-6 text-center border-b border-gray-700">
-          <h1 className="text-xl font-bold tracking-widest text-pink-500">RequestHub</h1>
+      <div className={`w-64 ${sidebarBg} text-white flex flex-col transition-colors duration-500`}>
+        <div className="p-6 text-center border-b border-gray-700/50">
+          <h1 className={`text-xl font-bold tracking-widest ${accentColor}`}>
+            {isAdmin ? 'AdminHub' : 'RequestHub'}
+          </h1>
         </div>
         
         <nav className="flex-1 p-4 space-y-2">
-          {/* Dashboard Home Link */}
-          <Link to="/dashboard" className="flex items-center w-full p-3 space-x-3 bg-pink-500 rounded-xl">
+          <Link to="/dashboard" className={`flex items-center w-full p-3 space-x-3 ${activeBtn} rounded-xl`}>
             <LayoutDashboard size={20} />
             <span className="text-base font-medium">Dashboard</span>
           </Link>
 
-          {/* My Requests Link */}
-          <Link to="/my-requests" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white">
-            <ClipboardList size={20} />
-            <span className="text-base font-medium">My Requests</span>
-          </Link>
+          {!isAdmin && (
+            <>
+              <Link to="/my-requests" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white">
+                <ClipboardList size={20} />
+                <span className="text-base font-medium">My Requests</span>
+              </Link>
 
-          {/* New Request Link (Perfectly Aligned) */}
-          <Link to="/new-request" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white">
-            <PlusCircle size={20} className="ml-0.5" />
-            <span className="text-base font-medium">New Request</span>
-          </Link>
+              <Link to="/new-request" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white">
+                <PlusCircle size={20} className="ml-0.5" />
+                <span className="text-base font-medium">New Request</span>
+              </Link>
+            </>
+          )}
 
-          {/* Admin Reports (Only visible if user role is admin) */}
-          {user.role === 'admin' && (
-  <Link 
-    to="/admin-panel" 
-    className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white"
-  >
-    <BarChart3 size={20} className="ml-0.5" />
-    <span className="text-base font-medium">Admin Panel</span>
-  </Link>
-)}
+          {isAdmin && (
+            <Link to="/admin-panel" className="flex items-center w-full p-3 space-x-3 hover:bg-blue-900/30 rounded-xl transition text-blue-100 hover:text-white border border-blue-500/20">
+              <ShieldCheck size={20} />
+              <span className="text-base font-medium">Admin Control</span>
+            </Link>
+          )}
         </nav>
 
-        <div className="p-4 border-t border-gray-700">
+        <div className="p-4 border-t border-gray-700/50">
           <button 
             onClick={handleLogout}
             className="flex items-center w-full p-3 space-x-3 hover:bg-red-900/30 text-red-400 rounded-xl transition"
@@ -94,47 +99,60 @@ const Dashboard = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
         <header className="h-16 bg-white border-b flex items-center justify-between px-8">
-          <h2 className="text-xl font-semibold text-gray-800">Welcome, {user.name}!</h2>
+          <div className="flex items-center space-x-2">
+            {isAdmin && <ShieldCheck className="text-blue-600" size={20} />}
+            <h2 className="text-xl font-semibold text-gray-800">
+              {isAdmin ? "Company Overview" : `Welcome, ${user.name}!`}
+            </h2>
+          </div>
+          
           <div className="flex items-center space-x-4">
             <Bell className="text-gray-400 cursor-pointer hover:text-gray-600" />
             <div className="flex items-center space-x-2 border-l pl-4">
-              <span className="text-sm font-medium text-gray-700">{user.role.toUpperCase()}</span>
-              <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center text-pink-600">
-                <User size={18} />
+              <div className="text-right hidden sm:block">
+                <p className="text-xs font-bold text-gray-400 uppercase leading-none mb-1">{user.role}</p>
+                <p className="text-sm font-medium text-gray-700 leading-none">{user.name}</p>
+              </div>
+              <div className={`w-10 h-10 ${isAdmin ? 'bg-blue-100 text-blue-600' : 'bg-pink-100 text-pink-600'} rounded-full flex items-center justify-center`}>
+                <User size={20} />
               </div>
             </div>
           </div>
         </header>
 
-        {/* Dynamic Data Content */}
+        {/* Content */}
         <main className="flex-1 overflow-y-auto p-8">
+          {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatCard title="Total Requests" value={stats.total} color="bg-blue-500" />
-            <StatCard title="Pending" value={stats.pending} color="bg-yellow-500" />
-            <StatCard title="Resolved" value={stats.resolved} color="bg-green-500" />
-            <StatCard title="High Priority" value={stats.highPriority} color="bg-red-500" />
+            <StatCard title={isAdmin ? "Total Company Requests" : "My Total Requests"} value={stats.total} color="bg-blue-500" />
+            <StatCard title="Pending Review" value={stats.pending} color="bg-yellow-500" />
+            <StatCard title="Successfully Resolved" value={stats.resolved} color="bg-green-500" />
+            <StatCard title="Urgent/Critical" value={stats.highPriority} color="bg-red-500" />
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-sm border h-80">
-  <h3 className="text-lg font-semibold text-gray-800 mb-4">Request Analytics</h3>
-  <div className="h-64">
-    <RequestChart stats={stats} />
-  </div>
-</div>
+          {/* Analytics Chart */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border h-96">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              {isAdmin ? "Company-Wide Analytics" : "Personal Request Trends"}
+            </h3>
+            <p className="text-sm text-gray-400 mb-6">Visual representation of request status and priority</p>
+            <div className="h-64">
+              <RequestChart stats={stats} />
+            </div>
+          </div>
         </main>
       </div>
     </div>
   );
 };
 
-// Reusable Stat Card Component
 const StatCard = ({ title, value, color }) => (
-  <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transform transition hover:scale-105">
+  <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
     <div className="flex items-center justify-between mb-4">
-      <h3 className="text-gray-500 text-sm font-medium">{title}</h3>
+      <h3 className="text-gray-400 text-xs font-bold uppercase tracking-wider">{title}</h3>
       <div className={`w-2 h-2 rounded-full ${color}`}></div>
     </div>
-    <p className="text-2xl font-bold text-gray-800">{value}</p>
+    <p className="text-3xl font-extrabold text-gray-800">{value}</p>
   </div>
 );
 
