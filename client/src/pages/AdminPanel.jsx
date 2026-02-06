@@ -28,10 +28,20 @@ const AdminPanel = () => {
 
   useEffect(() => { fetchAllData(); }, []);
 
-  const handleStatusChange = async (id, newStatus) => {
+  const handleStatusChange = async (id, newStatus, employeeName) => {
     try {
       await axios.put(`http://localhost:5000/api/requests/update-status/${id}`, { status: newStatus });
-      toast.success(`Request marked as ${newStatus}`);
+      
+      // Professional Feedback: Notify which employee's request was updated
+      toast.success(
+        (t) => (
+          <span>
+            <b>{employeeName}'s</b> request is now <b>{newStatus}</b>
+          </span>
+        ),
+        { icon: '🚀', duration: 4000 }
+      );
+      
       fetchAllData(); 
     } catch (err) {
       toast.error("Failed to update status");
@@ -57,7 +67,7 @@ const AdminPanel = () => {
               <ArrowLeft size={20} />
             </button>
             <div>
-              <h2 className="text-3xl font-bold text-gray-800">Admin Control Center</h2>
+              <h2 className="text-3xl font-bold text-gray-800 tracking-tight">Admin Control Center</h2>
               <p className="text-gray-500 text-sm">Managing company-wide requests by business priority</p>
             </div>
           </div>
@@ -65,7 +75,7 @@ const AdminPanel = () => {
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
-          <table className="w-full text-left">
+          <table className="w-full text-left border-separate border-spacing-0">
             <thead className="bg-gray-50 border-b border-gray-100 text-gray-400">
               <tr>
                 <th className="p-5 text-xs font-bold uppercase tracking-widest">Employee</th>
@@ -80,15 +90,15 @@ const AdminPanel = () => {
                 <tr key={req.id} className="hover:bg-gray-50/50 transition">
                   <td className="p-5">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs uppercase">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs uppercase shadow-sm">
                         {req.employee_name?.charAt(0)}
                       </div>
                       <span className="font-bold text-gray-700">{req.employee_name}</span>
                     </div>
                   </td>
                   <td className="p-5">
-                    <p className="font-medium text-gray-800">{req.title}</p>
-                    <p className="text-xs text-gray-400">{req.category}</p>
+                    <p className="font-medium text-gray-800 leading-none mb-1">{req.title}</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">{req.category}</p>
                   </td>
                   <td className="p-5"><span className={getPriorityBadge(req.priority)}>{req.priority}</span></td>
                   <td className="p-5">
@@ -104,8 +114,8 @@ const AdminPanel = () => {
                   <td className="p-5 text-center">
                     <select 
                       value={req.status} 
-                      onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                      className="bg-white border rounded-xl px-3 py-2 text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-400 transition cursor-pointer"
+                      onChange={(e) => handleStatusChange(req.id, e.target.value, req.employee_name)}
+                      className="bg-white border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-400 transition cursor-pointer hover:border-gray-200"
                     >
                       <option value="Open">Open</option>
                       <option value="Pending">Pending</option>

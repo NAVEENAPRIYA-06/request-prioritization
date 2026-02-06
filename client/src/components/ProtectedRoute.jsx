@@ -1,18 +1,20 @@
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children, allowAdminOnly = false }) => {
   const user = JSON.parse(localStorage.getItem('user'));
 
-  // If no user is logged in, send them to login
+  // 1. If no user is logged in, send them to login
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
-  // If the page is for admins only and user is an employee, send to dashboard
+  // 2. If the route is for Admin Only, but the user is an employee, send to dashboard
   if (allowAdminOnly && user.role !== 'admin') {
-    return <Navigate to="/dashboard" />;
+    return <Navigate to="/dashboard" replace />;
   }
 
+  // 3. Otherwise, show the page
   return children;
 };
 

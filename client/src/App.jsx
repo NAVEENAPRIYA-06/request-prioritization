@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast'; // Import the toaster container
+import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -11,7 +11,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 function App() {
   return (
     <>
-      {/* This renders the actual toast popups in the top-right of your screen */}
       <Toaster 
         position="top-right"
         toastOptions={{
@@ -47,7 +46,7 @@ function App() {
           </ProtectedRoute>
         } />
 
-        {/* Secured Admin Route */}
+        {/* Secured Admin Route - Uses allowAdminOnly to match ProtectedRoute logic */}
         <Route path="/admin-panel" element={
           <ProtectedRoute allowAdminOnly={true}>
             <AdminPanel />
