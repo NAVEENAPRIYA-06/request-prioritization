@@ -1,88 +1,51 @@
-import React, { useState } from 'react';
-import { X, Calendar, Tag, AlertCircle, Trash2 } from 'lucide-react';
-import axios from 'axios';
-import toast from 'react-hot-toast';
-import ConfirmModal from './ConfirmModal'; // Import the new modal
+import React from 'react';
+import { X, Calendar, Clock, FileText } from 'lucide-react';
 
-const DetailsModal = ({ request, onClose, onRefresh }) => {
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-
+const DetailsModal = ({ request, onClose }) => {
   if (!request) return null;
 
-  const handleConfirmedDelete = async () => {
-    try {
-      await axios.delete(`http://localhost:5000/api/requests/delete/${request.id}`);
-      toast.success("Request successfully removed");
-      onRefresh(); 
-      onClose();   
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Action failed");
-    } finally {
-      setIsConfirmOpen(false);
-    }
-  };
-
   return (
-    <>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden relative">
-          <button onClick={onClose} className="absolute right-6 top-6 text-gray-400 hover:text-gray-600 transition">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-6">
+      <div className="bg-white w-full max-w-lg rounded-[3rem] shadow-2xl p-10 overflow-hidden relative border border-white animate-in fade-in zoom-in duration-300">
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <span className="text-[10px] font-black text-[#8e4585] uppercase tracking-[0.3em]">Request Analysis</span>
+            <h3 className="text-3xl font-black text-slate-800 tracking-tighter italic mt-1">{request.title}</h3>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full text-slate-300 transition-colors">
             <X size={24} />
           </button>
+        </div>
 
-          <div className="p-8">
-            <div className="flex items-center space-x-2 text-pink-500 mb-2">
-              <AlertCircle size={18} />
-              <span className="text-xs font-bold uppercase tracking-wider">{request.priority} Priority</span>
+        <div className="space-y-6">
+          <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
+            <div className="flex items-center space-x-2 text-slate-400 mb-3">
+              <FileText size={16} />
+              <span className="text-[10px] font-black uppercase tracking-widest">Description</span>
+            </div>
+            <p className="text-slate-600 leading-relaxed font-medium">{request.description}</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-purple-50 p-5 rounded-[2rem] border border-purple-100 text-[#8e4585]">
+              <div className="flex items-center space-x-2 opacity-60 mb-2">
+                <Calendar size={14} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Issued On</span>
+              </div>
+              <p className="text-sm font-bold text-slate-700">{new Date(request.created_at).toLocaleDateString()}</p>
             </div>
             
-            <h3 className="text-2xl font-bold text-gray-800 mb-6">{request.title}</h3>
-
-            <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-xl text-gray-600 text-sm mb-4 italic">
-                "{request.description || "No description provided."}"
+            <div className="bg-slate-50 p-5 rounded-[2rem] border border-slate-100 text-slate-400">
+              <div className="flex items-center space-x-2 opacity-60 mb-2">
+                <Clock size={14} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Issue Time</span>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-xs text-gray-400 font-bold uppercase">Category</p>
-                  <p className="text-gray-700 font-medium">{request.category}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-400 font-bold uppercase">Status</p>
-                  <p className="text-gray-700 font-medium">{request.status}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 flex space-x-3">
-              <button onClick={onClose} className="flex-1 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition">
-                Close
-              </button>
-              
-              {(request.status === 'Pending' || request.status === 'Open') && (
-                <button 
-                  onClick={() => setIsConfirmOpen(true)} // Open custom modal instead of alert
-                  className="flex items-center justify-center space-x-2 px-6 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition border border-red-100"
-                >
-                  <Trash2 size={18} />
-                  <span>Cancel Request</span>
-                </button>
-              )}
+              <p className="text-sm font-bold text-slate-700">{new Date(request.created_at).toLocaleTimeString()}</p>
             </div>
           </div>
         </div>
       </div>
-
-      {/* The Custom Confirmation Logic */}
-      <ConfirmModal 
-        isOpen={isConfirmOpen}
-        onClose={() => setIsConfirmOpen(false)}
-        onConfirm={handleConfirmedDelete}
-        title="Cancel Request?"
-        message="Are you sure you want to remove this request? This action cannot be undone."
-      />
-    </>
+    </div>
   );
 };
 

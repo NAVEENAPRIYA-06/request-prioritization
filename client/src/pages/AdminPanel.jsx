@@ -1,134 +1,163 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Shield, ArrowLeft, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, History, LayoutGrid, Clock, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import DetailsModal from '../components/DetailsModal';
 
 const AdminPanel = () => {
   const [allRequests, setAllRequests] = useState([]);
+  const [selectedRequest, setSelectedRequest] = useState(null);
   const navigate = useNavigate();
 
   const fetchAllData = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/requests/admin/all');
-      
-      const priorityOrder = { 'Critical': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
-      const sortedData = res.data.sort((a, b) => {
-        if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
-          return priorityOrder[a.priority] - priorityOrder[b.priority];
-        }
-        return new Date(b.created_at) - new Date(a.created_at);
-      });
-      
-      setAllRequests(sortedData);
+      // Filters out resolved requests to maintain a clean active workspace
+      setAllRequests(res.data.filter(req => req.status !== 'Resolved'));
     } catch (err) {
-      toast.error("Failed to load requests");
+      toast.error("Failed to sync live queue");
     }
   };
 
-  useEffect(() => { fetchAllData(); }, []);
+  useEffect(() => { 
+    fetchAllData(); 
+  }, []);
 
-  const handleStatusChange = async (id, newStatus, employeeName) => {
+  const handleStatusChange = async (id, newStatus) => {
     try {
       await axios.put(`http://localhost:5000/api/requests/update-status/${id}`, { status: newStatus });
+      toast.success(`Priority updated to ${newStatus}`);
       
-      // Professional Feedback: Notify which employee's request was updated
-      toast.success(
-        (t) => (
-          <span>
-            <b>{employeeName}'s</b> request is now <b>{newStatus}</b>
-          </span>
-        ),
-        { icon: '🚀', duration: 4000 }
-      );
-      
-      fetchAllData(); 
+      // Auto-archives the request if marked as Resolved
+      if (newStatus === 'Resolved') {
+        setAllRequests(prev => prev.filter(req => req.id !== id));
+      } else {
+        fetchAllData();
+      }
     } catch (err) {
-      toast.error("Failed to update status");
+      toast.error("Update failed");
     }
-  };
-
-  const getPriorityBadge = (priority) => {
-    const styles = {
-      Critical: "bg-red-100 text-red-700 border-red-200 animate-pulse",
-      High: "bg-orange-100 text-orange-700 border-orange-200",
-      Medium: "bg-blue-100 text-blue-700 border-blue-200",
-      Low: "bg-gray-100 text-gray-700 border-gray-200"
-    };
-    return `px-3 py-1 rounded-full text-[10px] font-black uppercase border ${styles[priority] || styles.Low}`;
   };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-[#f1f5f9] p-8 md:p-12 font-sans">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <button onClick={() => navigate('/dashboard')} className="p-2 bg-white rounded-full shadow-sm border hover:bg-gray-50 transition">
+        
+        {/* Azure Themed Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div className="flex items-center space-x-5">
+            <button 
+              onClick={() => navigate('/dashboard')} 
+              className="p-3 bg-white rounded-2xl border border-slate-200 text-slate-400 hover:text-[#0077be] transition-all shadow-sm"
+            >
               <ArrowLeft size={20} />
             </button>
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 tracking-tight">Admin Control Center</h2>
-              <p className="text-gray-500 text-sm">Managing company-wide requests by business priority</p>
+              <h2 className="text-4xl font-black text-slate-800 tracking-tighter italic uppercase">Control Center</h2>
+              <div className="flex items-center space-x-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                <LayoutGrid size={12} /> <span>Managing Global Priorities</span>
+              </div>
             </div>
           </div>
-          <Shield size={40} className="text-blue-500 opacity-20" />
+          <button 
+            onClick={() => navigate('/archives')} 
+            className="flex items-center space-x-3 bg-white px-6 py-3 rounded-2xl border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-widest hover:bg-[#0077be] hover:text-white transition-all shadow-md"
+          >
+            <History size={18} />
+            <span>View Archives</span>
+          </button>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
-          <table className="w-full text-left border-separate border-spacing-0">
-            <thead className="bg-gray-50 border-b border-gray-100 text-gray-400">
+        {/* Floating Table Card */}
+        <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-300/20 border border-slate-200 overflow-hidden">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
-                <th className="p-5 text-xs font-bold uppercase tracking-widest">Employee</th>
-                <th className="p-5 text-xs font-bold uppercase tracking-widest">Title</th>
-                <th className="p-5 text-xs font-bold uppercase tracking-widest">Priority</th>
-                <th className="p-5 text-xs font-bold uppercase tracking-widest">Current Status</th>
-                <th className="p-5 text-xs font-bold uppercase tracking-widest text-center">Action</th>
+                <th className="p-8 text-[11px] font-black text-slate-400 uppercase tracking-widest">Employee</th>
+                <th className="p-8 text-[11px] font-black text-slate-400 uppercase tracking-widest">Service Title</th>
+                <th className="p-8 text-[11px] font-black text-slate-400 uppercase tracking-widest">Priority</th>
+                <th className="p-8 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">Update Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-slate-100">
               {allRequests.map((req) => (
-                <tr key={req.id} className="hover:bg-gray-50/50 transition">
-                  <td className="p-5">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs uppercase shadow-sm">
+                <tr 
+                  key={req.id} 
+                  className="hover:bg-blue-50/40 transition-all group cursor-pointer"
+                >
+                  {/* Employee Info */}
+                  <td className="p-8" onClick={() => setSelectedRequest(req)}>
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 rounded-2xl bg-blue-100 text-[#0077be] flex items-center justify-center font-black text-sm uppercase shadow-inner">
                         {req.employee_name?.charAt(0)}
                       </div>
-                      <span className="font-bold text-gray-700">{req.employee_name}</span>
+                      <span className="font-bold text-slate-700">{req.employee_name}</span>
                     </div>
                   </td>
-                  <td className="p-5">
-                    <p className="font-medium text-gray-800 leading-none mb-1">{req.title}</p>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">{req.category}</p>
+
+                  {/* Title & Category */}
+                  <td className="p-8" onClick={() => setSelectedRequest(req)}>
+                    <p className="font-black text-slate-800 text-lg tracking-tight group-hover:text-[#0077be] transition-colors italic">
+                      {req.title}
+                    </p>
+                    <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded text-[9px] font-black uppercase">
+                      {req.category}
+                    </span>
                   </td>
-                  <td className="p-5"><span className={getPriorityBadge(req.priority)}>{req.priority}</span></td>
-                  <td className="p-5">
-                    <div className="flex items-center space-x-2">
-                       {req.status === 'Resolved' ? (
-                         <CheckCircle size={16} className="text-green-500" />
-                       ) : (
-                         <Clock size={16} className={req.status === 'In Progress' ? 'text-blue-500' : 'text-yellow-500'} />
-                       )}
-                       <span className="text-sm font-semibold text-gray-600">{req.status}</span>
+
+                  {/* Premium Priority Badges */}
+                  <td className="p-8" onClick={() => setSelectedRequest(req)}>
+                    <div className={`inline-flex items-center px-4 py-2 rounded-2xl border transition-all duration-300 shadow-sm ${
+                      req.priority === 'Critical' 
+                      ? 'bg-rose-50 text-rose-600 border-rose-100 shadow-rose-100 animate-pulse' 
+                      : req.priority === 'High' 
+                      ? 'bg-orange-50 text-orange-600 border-orange-100 shadow-orange-100' 
+                      : 'bg-slate-50 text-slate-500 border-slate-200'
+                    }`}>
+                      <span className="text-[10px] font-black uppercase tracking-widest">{req.priority}</span>
                     </div>
                   </td>
-                  <td className="p-5 text-center">
-                    <select 
-                      value={req.status} 
-                      onChange={(e) => handleStatusChange(req.id, e.target.value, req.employee_name)}
-                      className="bg-white border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-400 transition cursor-pointer hover:border-gray-200"
-                    >
-                      <option value="Open">Open</option>
-                      <option value="Pending">Pending</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Resolved">Resolved</option>
-                    </select>
+
+                  {/* High-Fidelity Status Dropdown */}
+                  <td className="p-8 text-center">
+                    <div className="relative group inline-block">
+                      <select 
+                        value={req.status} 
+                        onClick={(e) => e.stopPropagation()} 
+                        onChange={(e) => handleStatusChange(req.id, e.target.value)}
+                        className="appearance-none bg-white border-2 border-slate-100 rounded-2xl px-6 py-4 pr-12 text-xs font-black text-slate-700 outline-none focus:ring-4 focus:ring-blue-50 focus:border-[#0077be] cursor-pointer transition-all shadow-sm hover:shadow-md"
+                      >
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          
+          {allRequests.length === 0 && (
+            <div className="p-32 text-center">
+              <CheckCircle size={48} className="mx-auto text-emerald-100 mb-4" />
+              <p className="text-slate-300 font-black uppercase text-sm tracking-widest italic">All Business Priorities Resolved</p>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Detail Analysis Modal */}
+      {selectedRequest && (
+        <DetailsModal 
+          request={selectedRequest} 
+          onClose={() => setSelectedRequest(null)} 
+        />
+      )}
     </div>
   );
 };

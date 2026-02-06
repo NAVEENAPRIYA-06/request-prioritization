@@ -2,75 +2,47 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-// Import Pages
+// Page Imports - Double check these filenames match exactly!
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import NewRequest from './pages/NewRequest';
 import MyRequests from './pages/MyRequests';
 import AdminPanel from './pages/AdminPanel';
-import Profile from './pages/Profile'; // New Import
-
-// Import Components
+import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
-
+import ResolvedArchive from './pages/ResolvedArchive';
 function App() {
   return (
-    <>
-      <Toaster 
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#333',
-            color: '#fff',
-            borderRadius: '10px',
-          },
-        }}
-      />
-
+    <div className="min-h-screen bg-[#f1f5f9]">
+      <Toaster position="top-right" />
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* Secured General Routes */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        } />
+        {/* Protected Routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/new-request" element={<ProtectedRoute><NewRequest /></ProtectedRoute>} />
+        <Route path="/my-requests" element={<ProtectedRoute><MyRequests /></ProtectedRoute>} />
 
-        {/* Secured Employee Only Routes */}
-        <Route path="/new-request" element={
-          <ProtectedRoute>
-            <NewRequest />
-          </ProtectedRoute>
-        } />
-        <Route path="/my-requests" element={
-          <ProtectedRoute>
-            <MyRequests />
-          </ProtectedRoute>
-        } />
-
-        {/* Secured Admin Only Route */}
+        {/* Admin Specific */}
         <Route path="/admin-panel" element={
           <ProtectedRoute allowAdminOnly={true}>
             <AdminPanel />
           </ProtectedRoute>
         } />
 
-        {/* Catch-all Redirect */}
+        {/* Fallback to Login if path doesn't exist */}
         <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="/archives" element={
+  <ProtectedRoute allowAdminOnly={true}>
+    <ResolvedArchive />
+  </ProtectedRoute>
+} />
       </Routes>
-    </>
+    </div>
   );
 }
 

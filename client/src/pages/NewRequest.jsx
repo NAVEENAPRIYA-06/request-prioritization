@@ -110,7 +110,7 @@ const NewRequest = () => {
             className={`w-full py-5 ${loading ? 'bg-slate-300' : 'bg-[#8e4585] hover:bg-[#72376a]'} text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-purple-100 transition-all transform hover:scale-[1.01] flex items-center justify-center space-x-3`}
           >
             <Send size={18} />
-            <span>{loading ? 'Processing...' : 'Submit to Queue'}</span>
+            <span>{loading ? 'Processing...' : 'Submit'}</span>
           </button>
         </form>
       </div>
