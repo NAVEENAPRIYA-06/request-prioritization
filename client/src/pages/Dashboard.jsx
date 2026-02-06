@@ -92,7 +92,7 @@ const Dashboard = () => {
           <div className="flex flex-col">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Corporate Portal</span>
             <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
-              {isAdmin ? "Global Monitoring" : `Hello, ${user.name.split(' ')[0]}`}
+              {isAdmin ? "Admin" : `Hello, ${user.name.split(' ')[0]}`}
             </h2>
           </div>
           
