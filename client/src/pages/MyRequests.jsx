@@ -1,19 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { ArrowLeft, Clock, CheckCircle, Info } from 'lucide-react';
+import { ArrowLeft, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DetailsModal from '../components/DetailsModal';
 
 const MyRequests = () => {
   const [requests, setRequests] = useState([]);
-  const [selectedRequest, setSelectedRequest] = useState(null); // State for modal
+  const [selectedRequest, setSelectedRequest] = useState(null);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
 
-  useEffect(() => {
+  // Function to fetch requests - defined separately so it can be reused
+  const fetchUserRequests = () => {
     axios.get(`http://localhost:5000/api/requests/user/${user.id}`)
       .then(res => setRequests(res.data))
-      .catch(err => console.log(err));
+      .catch(err => console.error("Error fetching requests:", err));
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserRequests();
+    }
   }, [user.id]);
 
   const getStatusStyle = (status) => {
@@ -24,10 +31,13 @@ const MyRequests = () => {
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
-      {/* Detail Modal Component */}
+      {/* Details Modal 
+          onRefresh triggers fetchUserRequests to update the table after a deletion
+      */}
       <DetailsModal 
         request={selectedRequest} 
         onClose={() => setSelectedRequest(null)} 
+        onRefresh={fetchUserRequests} 
       />
 
       <div className="max-w-6xl mx-auto">
@@ -40,7 +50,7 @@ const MyRequests = () => {
           </button>
           <div>
             <h2 className="text-3xl font-bold text-gray-800">My Request History</h2>
-            <p className="text-sm text-gray-500">Click on any row to view full details</p>
+            <p className="text-sm text-gray-500">Click on any row to view details or cancel pending requests</p>
           </div>
         </div>
         
@@ -66,7 +76,9 @@ const MyRequests = () => {
                   <td className="p-4 font-medium text-gray-800">{req.title}</td>
                   <td className="p-4 text-gray-600">{req.category}</td>
                   <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${req.priority === 'Critical' ? 'text-red-600 bg-red-50' : 'text-gray-600 bg-gray-100'}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      req.priority === 'Critical' ? 'text-red-600 bg-red-50' : 'text-gray-600 bg-gray-100'
+                    }`}>
                       {req.priority}
                     </span>
                   </td>
@@ -88,7 +100,9 @@ const MyRequests = () => {
             </tbody>
           </table>
           {requests.length === 0 && (
-            <div className="p-20 text-center text-gray-400">No requests found. Start by creating one!</div>
+            <div className="p-20 text-center text-gray-400">
+              No requests found. Start by creating one!
+            </div>
           )}
         </div>
       </div>

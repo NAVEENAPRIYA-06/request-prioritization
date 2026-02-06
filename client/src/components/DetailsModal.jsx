@@ -1,8 +1,24 @@
 import React from 'react';
-import { X, Calendar, User, Tag, AlertCircle } from 'lucide-react';
+import { X, Calendar, Tag, AlertCircle, Trash2 } from 'lucide-react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
-const DetailsModal = ({ request, onClose }) => {
+const DetailsModal = ({ request, onClose, onRefresh }) => {
   if (!request) return null;
+
+  const handleDelete = async () => {
+    // Using a simple confirm, but we'll make it a toast later if you like
+    if (window.confirm("Are you sure you want to cancel this request?")) {
+      try {
+        await axios.delete(`http://localhost:5000/api/requests/delete/${request.id}`);
+        toast.success("Request cancelled successfully");
+        onRefresh(); 
+        onClose();   
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Delete failed");
+      }
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -20,36 +36,42 @@ const DetailsModal = ({ request, onClose }) => {
           <h3 className="text-2xl font-bold text-gray-800 mb-6">{request.title}</h3>
 
           <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <Tag className="text-gray-400 mt-1" size={18} />
+            <div className="bg-gray-50 p-4 rounded-xl text-gray-600 text-sm mb-4">
+              <p className="text-xs text-gray-400 font-bold uppercase mb-1">Description</p>
+              {request.description || "No description provided."}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-xs text-gray-400 font-bold uppercase">Category</p>
-                <p className="text-gray-700">{request.category}</p>
+                <p className="text-gray-700 font-medium">{request.category}</p>
               </div>
-            </div>
-
-            <div className="flex items-start space-x-3">
-              <Calendar className="text-gray-400 mt-1" size={18} />
               <div>
-                <p className="text-xs text-gray-400 font-bold uppercase">Submitted On</p>
-                <p className="text-gray-700">{new Date(request.created_at).toLocaleString()}</p>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-gray-100">
-              <p className="text-xs text-gray-400 font-bold uppercase mb-2">Detailed Description</p>
-              <div className="bg-gray-50 p-4 rounded-xl text-gray-600 leading-relaxed text-sm max-h-40 overflow-y-auto">
-                {request.description || "No description provided."}
+                <p className="text-xs text-gray-400 font-bold uppercase">Status</p>
+                <p className="text-gray-700 font-medium">{request.status}</p>
               </div>
             </div>
           </div>
 
-          <button 
-            onClick={onClose}
-            className="w-full mt-8 py-3 bg-gray-800 text-white font-bold rounded-xl hover:bg-gray-900 transition"
-          >
-            Close Details
-          </button>
+          <div className="mt-8 flex space-x-3">
+            <button 
+              onClick={onClose}
+              className="flex-1 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition"
+            >
+              Close
+            </button>
+            
+            {/* Show cancel button only for 'Pending' or 'Open' */}
+            {(request.status === 'Pending' || request.status === 'Open') && (
+              <button 
+                onClick={handleDelete}
+                className="flex items-center justify-center space-x-2 px-6 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition border border-red-100"
+              >
+                <Trash2 size={18} />
+                <span>Cancel Request</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
