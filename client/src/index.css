@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Add a background color to the body to match your reference image's aesthetic */
+body {
+  @apply bg-slate-50;
+}
