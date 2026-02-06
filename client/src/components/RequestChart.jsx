@@ -4,19 +4,21 @@ import { Doughnut } from 'react-chartjs-2';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+// client/src/components/RequestChart.jsx
 const RequestChart = ({ stats }) => {
   const data = {
-    labels: ['Pending', 'Resolved', 'High Priority'],
+    labels: ['Pending Review', 'Resolved', 'High Priority'],
     datasets: [
       {
         label: 'Requests',
-        // We use the real stats from your database here
+        // Ensure the order matches the labels above
         data: [stats.pending, stats.resolved, stats.highPriority],
         backgroundColor: [
-          '#fbbf24', // Amber/Yellow for Pending
-          '#10b981', // Emerald/Green for Resolved
-          '#f43f5e', // Rose/Red for High Priority
+          '#fbbf24', // Yellow for Pending/Open
+          '#10b981', // Green for Resolved
+          '#f43f5e', // Red for High Priority
         ],
+        // ... rest of your styling
         hoverBackgroundColor: [
           '#f59e0b',
           '#059669',
