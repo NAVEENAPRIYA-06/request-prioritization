@@ -69,11 +69,14 @@ const Dashboard = () => {
 
           {/* Admin Reports (Only visible if user role is admin) */}
           {user.role === 'admin' && (
-            <Link to="/admin-panel" className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white">
-              <BarChart3 size={20} />
-              <span className="text-base font-medium">Admin Panel</span>
-            </Link>
-          )}
+  <Link 
+    to="/admin-panel" 
+    className="flex items-center w-full p-3 space-x-3 hover:bg-gray-800 rounded-xl transition text-gray-300 hover:text-white"
+  >
+    <BarChart3 size={20} className="ml-0.5" />
+    <span className="text-base font-medium">Admin Panel</span>
+  </Link>
+)}
         </nav>
 
         <div className="p-4 border-t border-gray-700">

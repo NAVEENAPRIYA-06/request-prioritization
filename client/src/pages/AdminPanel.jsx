@@ -1,67 +1,83 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Shield, RefreshCcw } from 'lucide-react';
 
 const AdminPanel = () => {
   const [allRequests, setAllRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchRequests();
-  }, []);
-
-  const fetchRequests = () => {
-    axios.get('http://localhost:5000/api/requests/admin/all')
-      .then(res => setAllRequests(res.data))
-      .catch(err => console.log(err));
+  const fetchAllData = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/requests/admin/all');
+      setAllRequests(res.data);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const updateStatus = (id, newStatus) => {
-    axios.put(`http://localhost:5000/api/requests/update-status/${id}`, { status: newStatus })
-      .then(() => {
-        alert("Status Updated");
-        fetchRequests(); // Refresh table
-      });
+  useEffect(() => { fetchAllData(); }, []);
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await axios.put(`http://localhost:5000/api/requests/update-status/${id}`, { status: newStatus });
+      fetchAllData(); // Refresh table
+    } catch (err) {
+      alert("Failed to update status");
+    }
   };
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
-      <h2 className="text-3xl font-bold mb-8">Admin Control Center</h2>
-      <div className="bg-white rounded-2xl shadow-sm border overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-gray-100 border-b">
-            <tr>
-              <th className="p-4">Employee</th>
-              <th className="p-4">Title</th>
-              <th className="p-4">Priority</th>
-              <th className="p-4">Status</th>
-              <th className="p-4">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allRequests.map(req => (
-              <tr key={req.id} className="border-b hover:bg-gray-50">
-                <td className="p-4 font-bold">{req.employee_name}</td>
-                <td className="p-4">{req.title}</td>
-                <td className="p-4">
-                   <span className={`px-2 py-1 rounded text-xs font-bold ${req.priority === 'Critical' ? 'bg-red-100 text-red-700' : 'bg-gray-100'}`}>
-                    {req.priority}
-                   </span>
-                </td>
-                <td className="p-4">{req.status}</td>
-                <td className="p-4">
-                  <select 
-                    className="border rounded p-1 text-sm outline-none"
-                    onChange={(e) => updateStatus(req.id, e.target.value)}
-                    value={req.status}
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Resolved">Resolved</option>
-                  </select>
-                </td>
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-800">Admin Control Center</h2>
+            <p className="text-gray-500">Manage and prioritize all employee requests</p>
+          </div>
+          <Shield size={40} className="text-pink-500 opacity-20" />
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50 border-b text-gray-600">
+              <tr>
+                <th className="p-4 font-semibold">Employee</th>
+                <th className="p-4 font-semibold">Request Title</th>
+                <th className="p-4 font-semibold">Priority</th>
+                <th className="p-4 font-semibold">Current Status</th>
+                <th className="p-4 font-semibold text-center">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y">
+              {allRequests.map((req) => (
+                <tr key={req.id} className="hover:bg-gray-50 transition">
+                  <td className="p-4 font-bold text-gray-700">{req.employee_name}</td>
+                  <td className="p-4 text-gray-600">{req.title}</td>
+                  <td className="p-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${req.priority === 'Critical' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
+                      {req.priority}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <span className="text-sm text-gray-500">{req.status}</span>
+                  </td>
+                  <td className="p-4 text-center">
+                    <select 
+                      value={req.status}
+                      onChange={(e) => handleStatusChange(req.id, e.target.value)}
+                      className="bg-white border rounded-lg px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-pink-400"
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Resolved">Resolved</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

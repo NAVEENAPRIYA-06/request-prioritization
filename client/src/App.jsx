@@ -1,35 +1,35 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import NewRequest from './pages/NewRequest';
-import MyRequests from './pages/MyRequests';
-import AdminPanel from './pages/AdminPanel';
+import ProtectedRoute from './components/ProtectedRoute';
 
-function App() {
-  return (
-    <Routes>
-      {/* 1. Root path redirects to Login by default */}
-      <Route path="/" element={<Navigate to="/login" />} />
+// Update your Routes inside the return statement:
+<Routes>
+  <Route path="/login" element={<Login />} />
+  <Route path="/register" element={<Register />} />
 
-      {/* 2. Authentication Pages */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+  {/* Secured Routes */}
+  <Route path="/dashboard" element={
+    <ProtectedRoute>
+      <Dashboard />
+    </ProtectedRoute>
+  } />
 
-      {/* 3. Main Dashboard Home */}
-      <Route path="/dashboard" element={<Dashboard />} />
+  <Route path="/new-request" element={
+    <ProtectedRoute>
+      <NewRequest />
+    </ProtectedRoute>
+  } />
 
-      {/* 4. Employee Features */}
-      <Route path="/new-request" element={<NewRequest />} />
-      <Route path="/my-requests" element={<MyRequests />} />
+  <Route path="/my-requests" element={
+    <ProtectedRoute>
+      <MyRequests />
+    </ProtectedRoute>
+  } />
 
-      {/* 5. Admin Features */}
-      <Route path="/admin-panel" element={<AdminPanel />} />
+  {/* Admin Only Route */}
+  <Route path="/admin-panel" element={
+    <ProtectedRoute allowAdminOnly={true}>
+      <AdminPanel />
+    </ProtectedRoute>
+  } />
 
-      {/* 6. Catch-all: Redirect unknown paths back to Dashboard/Login */}
-      <Route path="*" element={<Navigate to="/dashboard" />} />
-    </Routes>
-  );
-}
-
-export default App;
+  <Route path="*" element={<Navigate to="/login" />} />
+</Routes>
