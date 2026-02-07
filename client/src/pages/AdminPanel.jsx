@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { ArrowLeft, History, LayoutGrid, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, History, LayoutGrid, Clock, CheckCircle, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import DetailsModal from '../components/DetailsModal';
@@ -8,6 +8,7 @@ import DetailsModal from '../components/DetailsModal';
 const AdminPanel = () => {
   const [allRequests, setAllRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(""); // New: Search state
   const navigate = useNavigate();
 
   const fetchAllData = async () => {
@@ -29,7 +30,6 @@ const AdminPanel = () => {
       await axios.put(`http://localhost:5000/api/requests/update-status/${id}`, { status: newStatus });
       toast.success(`Priority updated to ${newStatus}`);
       
-      // Auto-archives the request if marked as Resolved
       if (newStatus === 'Resolved') {
         setAllRequests(prev => prev.filter(req => req.id !== id));
       } else {
@@ -39,6 +39,13 @@ const AdminPanel = () => {
       toast.error("Update failed");
     }
   };
+
+  // New: Multi-field search logic
+  const filteredRequests = allRequests.filter(req => 
+    req.employee_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    req.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `REQ-${req.id}`.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] p-8 md:p-12 font-sans">
@@ -60,13 +67,27 @@ const AdminPanel = () => {
               </div>
             </div>
           </div>
-          <button 
-            onClick={() => navigate('/archives')} 
-            className="flex items-center space-x-3 bg-white px-6 py-3 rounded-2xl border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-widest hover:bg-[#0077be] hover:text-white transition-all shadow-md"
-          >
-            <History size={18} />
-            <span>View Archives</span>
-          </button>
+
+          {/* New: Premium Search Bar */}
+          <div className="flex items-center space-x-4 flex-1 max-w-md">
+            <div className="relative w-full group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#0077be] transition-colors" size={18} />
+              <input 
+                type="text"
+                placeholder="Search name, ID, or title..."
+                className="w-full pl-14 pr-6 py-4 rounded-3xl border-2 border-transparent bg-white shadow-sm focus:bg-white focus:ring-8 focus:ring-blue-500/5 focus:border-[#0077be]/20 outline-none transition-all font-bold text-slate-600 italic"
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <button 
+              onClick={() => navigate('/archives')} 
+              className="flex items-center space-x-3 bg-white px-6 py-4 rounded-2xl border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-widest hover:bg-[#0077be] hover:text-white transition-all shadow-md"
+            >
+              <History size={18} />
+              <span className="hidden lg:inline">Archives</span>
+            </button>
+          </div>
         </div>
 
         {/* Floating Table Card */}
@@ -81,12 +102,11 @@ const AdminPanel = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {allRequests.map((req) => (
+              {filteredRequests.map((req) => (
                 <tr 
                   key={req.id} 
                   className="hover:bg-blue-50/40 transition-all group cursor-pointer"
                 >
-                  {/* Employee Info */}
                   <td className="p-8" onClick={() => setSelectedRequest(req)}>
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 rounded-2xl bg-blue-100 text-[#0077be] flex items-center justify-center font-black text-sm uppercase shadow-inner">
@@ -96,7 +116,6 @@ const AdminPanel = () => {
                     </div>
                   </td>
 
-                  {/* Title & Category */}
                   <td className="p-8" onClick={() => setSelectedRequest(req)}>
                     <p className="font-black text-slate-800 text-lg tracking-tight group-hover:text-[#0077be] transition-colors italic">
                       {req.title}
@@ -106,7 +125,6 @@ const AdminPanel = () => {
                     </span>
                   </td>
 
-                  {/* Premium Priority Badges */}
                   <td className="p-8" onClick={() => setSelectedRequest(req)}>
                     <div className={`inline-flex items-center px-4 py-2 rounded-2xl border transition-all duration-300 shadow-sm ${
                       req.priority === 'Critical' 
@@ -119,7 +137,6 @@ const AdminPanel = () => {
                     </div>
                   </td>
 
-                  {/* High-Fidelity Status Dropdown */}
                   <td className="p-8 text-center">
                     <div className="relative group inline-block">
                       <select 
@@ -129,7 +146,7 @@ const AdminPanel = () => {
                         className="appearance-none bg-white border-2 border-slate-100 rounded-2xl px-6 py-4 pr-12 text-xs font-black text-slate-700 outline-none focus:ring-4 focus:ring-blue-50 focus:border-[#0077be] cursor-pointer transition-all shadow-sm hover:shadow-md"
                       >
                         <option value="Open">Open</option>
-                        <option value="In Progress">In Progress</option>
+                        <option value="In Progress">Working</option>
                         <option value="Resolved">Resolved</option>
                       </select>
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300">
@@ -142,16 +159,15 @@ const AdminPanel = () => {
             </tbody>
           </table>
           
-          {allRequests.length === 0 && (
+          {filteredRequests.length === 0 && (
             <div className="p-32 text-center">
               <CheckCircle size={48} className="mx-auto text-emerald-100 mb-4" />
-              <p className="text-slate-300 font-black uppercase text-sm tracking-widest italic">All Business Priorities Resolved</p>
+              <p className="text-slate-300 font-black uppercase text-sm tracking-widest italic">No active priorities found</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Detail Analysis Modal */}
       {selectedRequest && (
         <DetailsModal 
           request={selectedRequest} 
