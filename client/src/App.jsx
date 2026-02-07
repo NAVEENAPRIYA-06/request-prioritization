@@ -115,6 +115,12 @@ function App() {
   </ProtectedRoute>
 } />
 
+        <Route path="/users" element={
+  <ProtectedRoute allowAdminOnly={true}>
+    <Layout><UserDirectory /></Layout>
+  </ProtectedRoute>
+} />
+
         {/* Fallback Redirect */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
