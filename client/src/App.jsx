@@ -18,6 +18,7 @@ import Analytics from './pages/Analytics';
 import UserDirectory from './pages/UserDirectory';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
 
 function App() {
   return (
@@ -107,6 +108,12 @@ function App() {
             <Layout><Profile /></Layout>
           </ProtectedRoute>
         } />
+
+        <Route path="/notifications" element={
+  <ProtectedRoute>
+    <Layout><Notifications /></Layout>
+  </ProtectedRoute>
+} />
 
         {/* Fallback Redirect */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
