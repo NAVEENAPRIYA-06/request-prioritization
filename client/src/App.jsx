@@ -2,47 +2,116 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-// Page Imports - Double check these filenames match exactly!
+// Layout & Security
+import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Page Components
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import NewRequest from './pages/NewRequest';
 import MyRequests from './pages/MyRequests';
 import AdminPanel from './pages/AdminPanel';
-import Profile from './pages/Profile';
-import ProtectedRoute from './components/ProtectedRoute';
 import ResolvedArchive from './pages/ResolvedArchive';
+import Analytics from './pages/Analytics';
+import UserDirectory from './pages/UserDirectory';
+import Settings from './pages/Settings';
+import Profile from './pages/Profile';
+
 function App() {
   return (
-    <div className="min-h-screen bg-[#f1f5f9]">
-      <Toaster position="top-right" />
+    <>
+      {/* Global Notification System */}
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          duration: 3000,
+          style: {
+            borderRadius: '20px',
+            background: '#1e293b',
+            color: '#fff',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            padding: '16px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+          },
+        }} 
+      />
+
       <Routes>
+        {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* Protected Routes */}
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/new-request" element={<ProtectedRoute><NewRequest /></ProtectedRoute>} />
-        <Route path="/my-requests" element={<ProtectedRoute><MyRequests /></ProtectedRoute>} />
+        {/* Protected Routes Wrapped in Layout 
+            The Layout component provides the persistent Sidebar on the left.
+        */}
 
-        {/* Admin Specific */}
-        <Route path="/admin-panel" element={
-          <ProtectedRoute allowAdminOnly={true}>
-            <AdminPanel />
+        {/* Shared Dashboard */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Layout><Dashboard /></Layout>
           </ProtectedRoute>
         } />
 
-        {/* Fallback to Login if path doesn't exist */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        {/* Employee Specific Modules */}
+        <Route path="/new-request" element={
+          <ProtectedRoute>
+            <Layout><NewRequest /></Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/my-requests" element={
+          <ProtectedRoute>
+            <Layout><MyRequests /></Layout>
+          </ProtectedRoute>
+        } />
+
+        {/* Admin Specific Modules */}
+        <Route path="/admin-panel" element={
+          <ProtectedRoute allowAdminOnly={true}>
+            <Layout><AdminPanel /></Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/users" element={
+          <ProtectedRoute allowAdminOnly={true}>
+            <Layout><UserDirectory /></Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/analytics" element={
+          <ProtectedRoute allowAdminOnly={true}>
+            <Layout><Analytics /></Layout>
+          </ProtectedRoute>
+        } />
+
         <Route path="/archives" element={
-  <ProtectedRoute allowAdminOnly={true}>
-    <ResolvedArchive />
-  </ProtectedRoute>
-} />
+          <ProtectedRoute allowAdminOnly={true}>
+            <Layout><ResolvedArchive /></Layout>
+          </ProtectedRoute>
+        } />
+
+        {/* Shared Utility Modules */}
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <Layout><Settings /></Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Layout><Profile /></Layout>
+          </ProtectedRoute>
+        } />
+
+        {/* Fallback Redirect */}
+        <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
-    </div>
+    </>
   );
 }
 
