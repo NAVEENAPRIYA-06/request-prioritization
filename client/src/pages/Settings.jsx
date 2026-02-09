@@ -135,7 +135,7 @@ const Settings = () => {
                <InputField label="New Password" type="password" value={passwords.new} onChange={(e) => setPasswords({...passwords, new: e.target.value})} />
                <InputField label="Confirm Password" type="password" value={passwords.confirm} onChange={(e) => setPasswords({...passwords, confirm: e.target.value})} />
             </div>
-            <button type="submit" className={`w-full py-5 ${bgColor} text-white rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.3em] italic shadow-lg hover:brightness-110 transition-all`}>Update Security Key</button>
+            <button type="submit" className={`w-full py-5 ${bgColor} text-white rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.3em] italic shadow-lg hover:brightness-110 transition-all`}>Update Password</button>
           </form>
         </div>
       )}
