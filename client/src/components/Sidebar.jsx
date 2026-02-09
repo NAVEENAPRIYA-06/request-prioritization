@@ -1,17 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  ShieldCheck, 
-  Users, 
-  History, 
-  BarChart3,
-  Settings, 
-  LogOut, 
-  ClipboardList, 
-  PlusCircle,
-  Bell
-} from 'lucide-react';
+import { LayoutDashboard, Users, History, BarChart3, Settings, LogOut, ClipboardList, PlusCircle, Bell, ShieldCheck } from 'lucide-react';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -28,6 +17,7 @@ const Sidebar = () => {
 
   const adminLinks = [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
+    { name: 'System Admin', icon: <ShieldCheck size={20} />, path: '/admin-panel' },
     { name: 'User Directory', icon: <Users size={20} />, path: '/users' },
     { name: 'Resolved Vault', icon: <History size={20} />, path: '/archives' },
     { name: 'Analytics', icon: <BarChart3 size={20} />, path: '/analytics' },
@@ -41,12 +31,6 @@ const Sidebar = () => {
   ];
 
   const links = isAdmin ? adminLinks : employeeLinks;
-
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
 
   return (
     <div className={`fixed left-0 top-0 h-screen w-72 ${theme.bg} flex flex-col text-white shadow-2xl z-50`}>
@@ -71,6 +55,7 @@ const Sidebar = () => {
       </nav>
 
       <div className="p-8 border-t border-white/10 space-y-4">
+        {/* Name and redundant avatar removed for a cleaner look */}
         <button 
           onClick={() => navigate('/settings')}
           className={`w-full flex items-center space-x-4 px-6 py-3 rounded-xl transition-all text-xs font-bold uppercase tracking-widest ${
@@ -80,7 +65,8 @@ const Sidebar = () => {
           <Settings size={18} />
           <span>Settings</span>
         </button>
-        <button onClick={handleLogout} className="w-full flex items-center space-x-4 px-6 py-4 rounded-2xl bg-black/10 hover:bg-black/20 text-rose-200 transition-all font-black text-xs uppercase tracking-widest">
+        
+        <button onClick={() => { localStorage.clear(); navigate('/login'); }} className="w-full flex items-center space-x-4 px-6 py-4 rounded-2xl bg-black/10 hover:bg-black/20 text-rose-200 transition-all font-black text-xs uppercase tracking-widest">
           <LogOut size={18} />
           <span>Sign Out</span>
         </button>
