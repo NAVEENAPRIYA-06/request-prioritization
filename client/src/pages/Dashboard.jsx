@@ -109,7 +109,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Legend Area with Fixed Amber Dot */}
+            {/* Legend Area */}
             <div className="space-y-4 w-full max-w-sm">
               <LegendItem color="bg-amber-400" label="Open / New" count={stats.open} />
               <LegendItem color="bg-blue-500" label="In Progress" count={stats.progress} />
