@@ -14,7 +14,8 @@ const AdminPanel = () => {
   const fetchAllData = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/requests/admin/all');
-      setAllRequests(res.data.filter(req => req.status !== 'Resolved'));
+      // Filter out both Resolved and Rejected from the active Control Center view
+      setAllRequests(res.data.filter(req => req.status !== 'Resolved' && req.status !== 'Rejected'));
     } catch (err) {
       toast.error("Failed to sync live queue");
     }
@@ -26,7 +27,8 @@ const AdminPanel = () => {
     try {
       await axios.put(`http://localhost:5000/api/requests/update-status/${id}`, { status: newStatus });
       toast.success(`Priority updated to ${newStatus}`);
-      if (newStatus === 'Resolved') {
+      // Remove from view if Resolved or Rejected
+      if (newStatus === 'Resolved' || newStatus === 'Rejected') {
         setAllRequests(prev => prev.filter(req => req.id !== id));
       } else {
         fetchAllData();
@@ -110,6 +112,7 @@ const AdminPanel = () => {
                     <option value="Open">Open</option>
                     <option value="In Progress">Working</option>
                     <option value="Resolved">Resolved</option>
+                    <option value="Rejected">Rejected</option>
                   </select>
                 </td>
               </tr>

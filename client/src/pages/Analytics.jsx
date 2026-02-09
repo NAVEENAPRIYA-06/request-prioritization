@@ -1,165 +1,91 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { 
-  AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, 
-  TrendingUp, Calendar, Zap, ShieldCheck, Activity, CheckCircle, Clock
-} from 'recharts';
+import { BarChart3, PieChart, TrendingUp, Activity, CheckCircle, Clock } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Analytics = () => {
-  // Initialize with default values to prevent "undefined" crashes
-  const [data, setData] = useState({ 
-    trendData: [], 
-    stats: { total: 0, resolved: 0, pending: 0, urgent: 0 } 
-  });
-  const [timeframe, setTimeframe] = useState('DAILY');
-  const themeColor = "text-[#0077be]";
-  const bgColor = "bg-[#0077be]";
+  const [stats, setStats] = useState({ total: 0, resolved: 0, pending: 0, urgent: 0 });
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
+    const fetchStats = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/requests/admin/analytics?timeframe=${timeframe.toLowerCase()}`);
-        setData(res.data);
+        const res = await axios.get('http://localhost:5000/api/requests/admin/all');
+        const data = res.data;
+        setStats({
+          total: data.length,
+          resolved: data.filter(r => r.status === 'Resolved').length,
+          pending: data.filter(r => r.status === 'Open').length,
+          urgent: data.filter(r => r.priority === 'Critical').length
+        });
       } catch (err) {
-        console.error("Analytics sync error");
+        toast.error("Failed to load real-time analytics");
       }
     };
-    fetchAnalytics();
-  }, [timeframe]);
+    fetchStats();
+  }, []);
 
-  // Calculate success rate safely
-  const successRate = data.stats?.total > 0 
-    ? ((data.stats.resolved / data.stats.total) * 100).toFixed(0) 
-    : 0;
+  const resolveRate = stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0;
 
   return (
-    <div className="p-12 animate-in fade-in duration-700 max-w-[1600px] mx-auto">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-12">
-        <div>
-          <h2 className="text-5xl font-black text-slate-800 tracking-tighter italic uppercase underline decoration-slate-100">System Analytics</h2>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-2 italic">Global Performance Metrics</p>
-        </div>
-        <div className="flex bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100">
-          {['DAILY', 'WEEKLY', 'MONTHLY'].map((t) => (
-            <button
-              key={t}
-              onClick={() => setTimeframe(t)}
-              className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                timeframe === t ? `${bgColor} text-white shadow-lg shadow-blue-500/20` : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+    <div className="p-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      <div className="mb-12">
+        <h2 className="text-4xl font-black text-slate-800 tracking-tighter italic uppercase">System Analytics</h2>
+        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Global Performance Metrics</p>
       </div>
 
-      {/* Top Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-        <StatCard label="Total Volume" value={data.stats?.total} color="blue" />
-        <StatCard label="Resolved" value={data.stats?.resolved} color="emerald" />
-        <StatCard label="Pending" value={data.stats?.pending} color="amber" />
-        <StatCard label="Urgent" value={data.stats?.urgent} color="rose" />
+      {/* Main Stats Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        {[
+          { label: 'Total Volume', value: stats.total, icon: <Activity />, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Resolved', value: stats.resolved, icon: <CheckCircle />, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Pending Review', value: stats.pending, icon: <Clock />, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Urgent Action', value: stats.urgent, icon: <TrendingUp />, color: 'text-rose-600', bg: 'bg-rose-50' },
+        ].map((item, idx) => (
+          <div key={idx} className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-white">
+            <div className={`w-12 h-12 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center mb-6 shadow-inner`}>
+              {item.icon}
+            </div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{item.label}</p>
+            <p className="text-4xl font-black text-slate-800 tracking-tighter">{item.value}</p>
+          </div>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Efficiency Gauge */}
-        <div className="bg-white p-12 rounded-[3.5rem] shadow-2xl border border-white flex flex-col items-center">
-          <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-10 w-full">Resolution Efficiency</h3>
+      {/* Visual Charts Area */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div className="bg-white p-10 rounded-[3.5rem] shadow-2xl shadow-slate-200/50 border border-white flex flex-col items-center">
+          <h3 className="text-lg font-black text-slate-800 uppercase tracking-tighter italic mb-10 w-full">Resolution Efficiency</h3>
           <div className="relative w-64 h-64 flex items-center justify-center">
-             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" stroke="#f1f5f9" strokeWidth="8" fill="transparent" />
-                <circle 
-                  cx="50" cy="50" r="45" stroke="#10b981" strokeWidth="8" fill="transparent" 
-                  strokeDasharray="282.7" 
-                  strokeDashoffset={282.7 - (282.7 * (successRate / 100))}
-                  strokeLinecap="round"
-                  className="transition-all duration-1000"
-                />
+             {/* Progress Ring */}
+             <svg className="w-full h-full transform -rotate-90">
+               <circle cx="50%" cy="50%" r="45%" stroke="currentColor" strokeWidth="20" fill="transparent" className="text-slate-100" />
+               <circle cx="50%" cy="50%" r="45%" stroke="currentColor" strokeWidth="20" fill="transparent" strokeDasharray="283" strokeDashoffset={283 - (283 * resolveRate) / 100} className="text-emerald-500 transition-all duration-1000" />
              </svg>
              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-5xl font-black text-slate-800 tracking-tighter">{successRate}%</span>
-                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Success Rate</span>
+                <span className="text-5xl font-black text-slate-800">{resolveRate}%</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase">Success Rate</span>
              </div>
           </div>
         </div>
 
-        {/* The Graph - Added h-[400px] to fix "width/height should be greater than 0" error */}
-        <div className="lg:col-span-2 bg-slate-900 p-12 rounded-[4rem] text-white shadow-2xl relative overflow-hidden h-[450px]">
-          <div className="relative z-10 h-full flex flex-col">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center space-x-3 italic">
-                <TrendingUp className="text-[#0077be]" size={20} />
-                <h3 className="text-xs font-black uppercase tracking-[0.3em]">System Traffic Trend</h3>
-              </div>
-              <div className="text-[10px] font-bold text-slate-500 uppercase flex items-center">
-                <Calendar size={12} className="mr-2"/> LIVE FEED: {timeframe}
-              </div>
-            </div>
-            
-            <div className="flex-1 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.trendData}>
-                  <defs>
-                    <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0077be" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#0077be" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '16px', fontSize: '10px', fontWeight: '900' }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="count" 
-                    stroke="#0077be" 
-                    strokeWidth={5} 
-                    fillOpacity={1} 
-                    fill="url(#colorTrend)" 
-                    animationDuration={2000}
-                  />
-                  <XAxis dataKey="label" stroke="#475569" fontSize={10} fontWeight={800} axisLine={false} tickLine={false} dy={15} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+        <div className="bg-slate-900 p-10 rounded-[3.5rem] shadow-2xl text-white overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-12 opacity-10">
+            <BarChart3 size={120} />
           </div>
-        </div>
-
-        {/* System Health */}
-        <div className="bg-slate-900 p-12 rounded-[3.5rem] text-white shadow-2xl flex flex-col justify-between">
-           <div>
-              <h4 className="text-sm font-black text-[#0077be] italic uppercase tracking-widest mb-4">System Health</h4>
-              <p className="text-xs font-bold text-slate-400 leading-relaxed mb-8">All background processes are operating within normal parameters.</p>
-              <div className="space-y-3">
-                 <HealthPill label="API Latency" value="24ms" />
-                 <HealthPill label="Database Sync" value="Stable" />
-                 <HealthPill label="Auth Service" value="Online" />
+          <h3 className="text-lg font-black uppercase tracking-tighter italic mb-4 relative z-10 text-blue-400">System Health</h3>
+          <p className="text-slate-400 font-medium mb-10 relative z-10">All background processes are operating within normal parameters.</p>
+          <div className="space-y-6 relative z-10">
+            {['API Latency: 24ms', 'Database Sync: Stable', 'Auth Service: Active'].map((text, i) => (
+              <div key={i} className="flex items-center space-x-3 text-xs font-black uppercase tracking-widest text-emerald-400 bg-emerald-400/10 w-fit px-4 py-2 rounded-xl">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
+                <span>{text}</span>
               </div>
-           </div>
-           <Zap className="opacity-5 self-end" size={80} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
-const StatCard = ({ label, value, color }) => (
-  <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-white">
-    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-    <div className={`text-4xl font-black tracking-tighter ${
-        color === 'blue' ? 'text-blue-500' : 
-        color === 'emerald' ? 'text-emerald-500' : 
-        color === 'amber' ? 'text-amber-500' : 'text-rose-500'
-    }`}>{value || 0}</div>
-  </div>
-);
-
-const HealthPill = ({ label, value }) => (
-  <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-     <span className="text-[10px] font-black uppercase text-slate-400">{label}: <span className="text-emerald-400">{value}</span></span>
-     <ShieldCheck size={14} className="text-emerald-400 opacity-50" />
-  </div>
-);
 
 export default Analytics;

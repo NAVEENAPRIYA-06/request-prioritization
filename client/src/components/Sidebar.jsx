@@ -1,6 +1,10 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, History, BarChart3, Settings, LogOut, ClipboardList, PlusCircle, Bell, ShieldCheck } from 'lucide-react';
+// Added HelpCircle and Star to the imports
+import { 
+  LayoutDashboard, Users, History, BarChart3, Settings, 
+  LogOut, ClipboardList, PlusCircle, Bell, HelpCircle, Star 
+} from 'lucide-react';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -17,7 +21,7 @@ const Sidebar = () => {
 
   const adminLinks = [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
-    { name: 'System Admin', icon: <ShieldCheck size={20} />, path: '/admin-panel' },
+    { name: 'System Admin', icon: <History size={20} />, path: '/admin-panel' },
     { name: 'User Directory', icon: <Users size={20} />, path: '/users' },
     { name: 'Resolved Vault', icon: <History size={20} />, path: '/archives' },
     { name: 'Analytics', icon: <BarChart3 size={20} />, path: '/analytics' },
@@ -28,6 +32,10 @@ const Sidebar = () => {
     { name: 'My Requests', icon: <ClipboardList size={20} />, path: '/my-requests' },
     { name: 'New Request', icon: <PlusCircle size={20} />, path: '/new-request' },
     { name: 'Notifications', icon: <Bell size={20} />, path: '/notifications' },
+    // Step 1: Help Center Added
+    { name: 'Help Center', icon: <HelpCircle size={20} />, path: '/help' },
+    // Step 2: Feedback Added (Placeholder for next step)
+    { name: 'Feedback', icon: <Star size={20} />, path: '/feedback' },
   ];
 
   const links = isAdmin ? adminLinks : employeeLinks;
@@ -39,7 +47,7 @@ const Sidebar = () => {
         <div className="h-1 w-12 bg-white/30 mt-2 rounded-full"></div>
       </div>
 
-      <nav className="flex-1 px-6 space-y-3">
+      <nav className="flex-1 px-6 space-y-3 overflow-y-auto custom-scrollbar">
         {links.map((link) => (
           <button
             key={link.path}
@@ -54,8 +62,7 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      <div className="p-8 border-t border-white/10 space-y-4">
-        {/* Name and redundant avatar removed for a cleaner look */}
+      <div className="p-8 border-t border-white/10 space-y-4 bg-black/5">
         <button 
           onClick={() => navigate('/settings')}
           className={`w-full flex items-center space-x-4 px-6 py-3 rounded-xl transition-all text-xs font-bold uppercase tracking-widest ${
@@ -66,7 +73,10 @@ const Sidebar = () => {
           <span>Settings</span>
         </button>
         
-        <button onClick={() => { localStorage.clear(); navigate('/login'); }} className="w-full flex items-center space-x-4 px-6 py-4 rounded-2xl bg-black/10 hover:bg-black/20 text-rose-200 transition-all font-black text-xs uppercase tracking-widest">
+        <button 
+          onClick={() => { localStorage.clear(); navigate('/login'); }} 
+          className="w-full flex items-center space-x-4 px-6 py-4 rounded-2xl bg-black/10 hover:bg-black/20 text-rose-200 transition-all font-black text-xs uppercase tracking-widest"
+        >
           <LogOut size={18} />
           <span>Sign Out</span>
         </button>
