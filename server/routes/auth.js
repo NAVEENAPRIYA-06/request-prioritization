@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 // Registration Route
 router.post('/register', async (req, res) => {
     const { fullName, email, password, role } = req.body;
@@ -112,5 +114,47 @@ router.put('/admin/toggle-access/:id', async (req, res) => {
     }
 });
 
+// server/routes/auth.js
+
+// Update Profile Photo URL
+router.put('/update-photo/:id', async (req, res) => {
+    const { photoUrl } = req.body;
+    try {
+        await db.query("UPDATE users SET profile_pic = ? WHERE id = ?", [photoUrl, req.params.id]);
+        res.status(200).json({ message: "Profile photo updated successfully" });
+    } catch (err) {
+        res.status(500).json({ message: "Error updating photo", error: err });
+    }
+});
+
+router.put('/upload-photo/:id', upload.single('profile_pic'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).send("No file uploaded");
+        
+        // Generate the URL for the stored file
+        const photoUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+        
+        await db.query("UPDATE users SET profile_pic = ? WHERE id = ?", [photoUrl, req.params.id]);
+        res.status(200).json({ message: "Photo uploaded", photoUrl });
+    } catch (err) {
+        res.status(500).json({ message: "Server error during upload", error: err });
+    }
+});
+
+router.put('/upload-photo/:id', upload.single('profile_pic'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file received by server" });
+        }
+        
+        // Construct the full URL for the frontend to display
+        const photoUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+        
+        await db.query("UPDATE users SET profile_pic = ? WHERE id = ?", [photoUrl, req.params.id]);
+        res.status(200).json({ message: "Upload successful", photoUrl });
+    } catch (err) {
+        res.status(500).json({ message: "Database update failed", error: err });
+    }
+});
 
 module.exports = router;
