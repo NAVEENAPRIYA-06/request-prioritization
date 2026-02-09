@@ -1,113 +1,107 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, Archive, Calendar, Search, CheckCircle2, Hash, Clock 
-} from 'lucide-react';
+import { Search, Archive, User, Calendar, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import DetailsModal from '../components/DetailsModal';
 
 const ResolvedArchive = () => {
   const [archives, setArchives] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedArchive, setSelectedArchive] = useState(null);
-  const navigate = useNavigate();
+  const [filterPriority, setFilterPriority] = useState("All");
+  const [loading, setLoading] = useState(true);
 
   const fetchArchives = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/requests/admin/all');
-      setArchives(res.data.filter(req => req.status === 'Resolved'));
+      const res = await axios.get(`http://localhost:5000/api/requests/admin/archive-search?term=${searchTerm}&priority=${filterPriority}`);
+      setArchives(res.data);
+      setLoading(false);
     } catch (err) {
-      toast.error("Could not load archives");
+      toast.error("Archive access failed");
+      setLoading(false);
     }
   };
 
-  useEffect(() => { fetchArchives(); }, []);
-
-  const filteredArchives = archives.filter(req => 
-    req.employee_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    req.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    `REQ-${req.id}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchArchives();
+  }, [searchTerm, filterPriority]);
 
   return (
-    <div className="min-h-screen pb-20 bg-[#f8fafc]">
-      <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur-2xl border-b border-white/50 px-10 py-8 shadow-sm">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center space-x-6">
-            <button 
-              onClick={() => navigate('/admin-panel')} 
-              className="p-4 bg-white rounded-[1.5rem] border border-slate-100 text-[#0077be] hover:bg-[#0077be] hover:text-white transition-all shadow-xl shadow-blue-900/5"
-            >
-              <ArrowLeft size={24} />
-            </button>
-            <div>
-              <div className="flex items-center space-x-2 text-[#0077be] mb-1">
-                <Archive size={14} />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Vault History</span>
-              </div>
-              <h2 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase">Resolved Archives</h2>
-            </div>
-          </div>
+    <div className="p-12 animate-in fade-in duration-700 max-w-[1400px] mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
+        <div>
+          <h2 className="text-4xl font-black text-slate-800 tracking-tighter italic uppercase underline decoration-slate-200">Resolved Archive</h2>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">Audit Resolved Intelligence & History</p>
+        </div>
 
-          <div className="relative group w-full max-w-md">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#0077be] transition-colors" size={20} />
+        {/* Search & Filter Controls */}
+        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={16} />
             <input 
-              type="text"
-              placeholder="Search historical records..."
-              className="w-full pl-16 pr-8 py-5 rounded-[2.5rem] border-2 border-slate-50 bg-white shadow-xl shadow-slate-200/40 focus:ring-8 focus:ring-blue-500/5 outline-none transition-all font-bold text-slate-700 italic"
+              type="text" 
+              placeholder="Search user or title..." 
+              className="pl-12 pr-6 py-4 rounded-2xl bg-white shadow-xl shadow-slate-200/20 border-none outline-none font-bold text-xs w-full sm:w-64"
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto px-10 mt-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredArchives.map((req) => (
-            <div 
-              key={req.id} 
-              onClick={() => setSelectedArchive(req)}
-              className="group bg-white/80 backdrop-blur-md rounded-[3.5rem] p-10 border border-white shadow-2xl shadow-slate-300/30 hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-2 cursor-pointer relative"
-            >
-              <div className="flex justify-between items-start mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-sm uppercase shadow-xl shadow-slate-900/20">
-                  {req.employee_name?.charAt(0)}
-                </div>
-                <div className="px-4 py-2 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center space-x-2 text-emerald-600">
-                  <CheckCircle2 size={14} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Archived</span>
-                </div>
-              </div>
-
-              <div className="mb-10">
-                <div className="flex items-center space-x-2 text-[#0077be] mb-3">
-                  <Hash size={16} strokeWidth={3} />
-                  <span className="font-mono text-sm font-black tracking-tighter text-slate-400 group-hover:text-[#0077be] transition-colors">REQ-{req.id}</span>
-                </div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight italic group-hover:text-[#0077be] transition-colors">
-                  {req.title}
-                </h3>
-              </div>
-
-              <div className="pt-8 border-t border-slate-100 flex flex-col space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  <div className="flex items-center space-x-2">
-                    <Calendar size={14} />
-                    <span>Finished: {new Date(req.updated_at || req.created_at).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+          <select 
+            className="px-6 py-4 rounded-2xl bg-white shadow-xl shadow-slate-200/20 border-none outline-none font-black text-[10px] uppercase tracking-widest text-slate-500 appearance-none cursor-pointer"
+            onChange={(e) => setFilterPriority(e.target.value)}
+          >
+            <option value="All">All Priorities</option>
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
         </div>
       </div>
 
-      {selectedArchive && (
-        <DetailsModal 
-          request={selectedArchive} 
-          onClose={() => setSelectedArchive(null)} 
-        />
+      {/* Archive Grid */}
+      {loading ? (
+        <div className="text-center py-20 font-black text-slate-200 animate-pulse uppercase tracking-[0.5em]">Syncing Archive...</div>
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          {archives.length > 0 ? archives.map((req) => (
+            <div key={req.id} className="bg-white p-8 rounded-[3rem] shadow-2xl shadow-slate-200/40 border border-white hover:scale-[1.01] transition-all group">
+              <div className="flex justify-between items-start mb-6">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-colors">
+                    <Archive size={20} />
+                  </div>
+                  <div>
+                     <h4 className="text-lg font-black text-slate-800 uppercase italic tracking-tight">{req.title}</h4>
+                     <div className="flex items-center space-x-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                       <User size={10} /> <span>{req.user_name}</span>
+                     </div>
+                  </div>
+                </div>
+                <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-lg ${req.priority === 'Critical' ? 'bg-rose-50 text-rose-500 shadow-sm shadow-rose-100' : 'bg-slate-50 text-slate-400'}`}>
+                  {req.priority}
+                </span>
+              </div>
+              
+              <p className="text-xs font-medium text-slate-500 italic mb-6 leading-relaxed">
+                {req.description}
+              </p>
+
+              <div className="pt-6 border-t border-slate-50 flex justify-between items-center">
+                 <div className="flex items-center space-x-2 text-slate-300 italic font-bold text-[10px]">
+                   <Calendar size={12} />
+                   <span>Archived on {new Date(req.updated_at).toLocaleDateString()}</span>
+                 </div>
+                 <div className="flex items-center space-x-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-[9px] font-black uppercase italic">
+                   <CheckCircle2 size={12} />
+                   <span>Verified</span>
+                 </div>
+              </div>
+            </div>
+          )) : (
+            <div className="col-span-full py-20 text-center opacity-20">
+              <Archive size={48} className="mx-auto mb-4" />
+              <p className="text-xs font-black uppercase tracking-widest">No matching history found</p>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

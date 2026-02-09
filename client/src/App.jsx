@@ -20,12 +20,12 @@ import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
 import HelpCenter from './pages/HelpCenter'; 
-import Feedback from './pages/Feedback';    
+import Feedback from './pages/Feedback';
+import SLATracker from './pages/SLATracker'; // 1. Import the new page component
 
 function App() {
   return (
     <>
-      {/* Global Notification System */}
       <Toaster 
         position="top-right" 
         toastOptions={{
@@ -69,7 +69,14 @@ function App() {
           </ProtectedRoute>
         } />
 
-        {/* Help Center & Feedback Routes */}
+        {/* SLA Tracker Route - Added to fix the redirect issue */}
+        <Route path="/sla-tracker" element={
+          <ProtectedRoute>
+            <Layout><SLATracker /></Layout>
+          </ProtectedRoute>
+        } />
+
+        {/* Shared Utility Modules */}
         <Route path="/help" element={
           <ProtectedRoute>
             <Layout><HelpCenter /></Layout>
@@ -107,7 +114,6 @@ function App() {
           </ProtectedRoute>
         } />
 
-        {/* Shared Utility Modules */}
         <Route path="/settings" element={
           <ProtectedRoute>
             <Layout><Settings /></Layout>

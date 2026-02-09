@@ -6,7 +6,8 @@ import toast from 'react-hot-toast';
 const UserDirectory = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [selectedUser, setSelectedUser] = useState(null);
+const [userStats, setUserStats] = useState({ requests: [], rating: 0 });
   const fetchUsers = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/auth/directory');
