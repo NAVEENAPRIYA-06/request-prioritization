@@ -19,6 +19,8 @@ import UserDirectory from './pages/UserDirectory';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
+import HelpCenter from './pages/HelpCenter'; 
+import Feedback from './pages/Feedback';    
 
 function App() {
   return (
@@ -47,10 +49,6 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* Protected Routes Wrapped in Layout 
-            The Layout component provides the persistent Sidebar on the left.
-        */}
-
         {/* Shared Dashboard */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
@@ -68,6 +66,19 @@ function App() {
         <Route path="/my-requests" element={
           <ProtectedRoute>
             <Layout><MyRequests /></Layout>
+          </ProtectedRoute>
+        } />
+
+        {/* Help Center & Feedback Routes */}
+        <Route path="/help" element={
+          <ProtectedRoute>
+            <Layout><HelpCenter /></Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/feedback" element={
+          <ProtectedRoute>
+            <Layout><Feedback /></Layout>
           </ProtectedRoute>
         } />
 
@@ -110,16 +121,10 @@ function App() {
         } />
 
         <Route path="/notifications" element={
-  <ProtectedRoute>
-    <Layout><Notifications /></Layout>
-  </ProtectedRoute>
-} />
-
-        <Route path="/users" element={
-  <ProtectedRoute allowAdminOnly={true}>
-    <Layout><UserDirectory /></Layout>
-  </ProtectedRoute>
-} />
+          <ProtectedRoute>
+            <Layout><Notifications /></Layout>
+          </ProtectedRoute>
+        } />
 
         {/* Fallback Redirect */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
