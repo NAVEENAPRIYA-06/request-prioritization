@@ -18,3 +18,29 @@ body {
 ::-webkit-scrollbar-thumb {
   @apply bg-slate-300 dark:bg-slate-700 rounded-full;
 }
+body {
+  background: radial-gradient(circle at top right, #f8fafc, #eff6ff); /* Soft blue-ish background */
+  overflow-x: hidden;
+}
+
+/* Custom shadow for your "Bento" cards */
+.bento-shadow {
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.05);
+}
+@keyframes custom-pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 0.5; }
+}
+
+.health-pulse {
+  animation: custom-pulse 2s infinite ease-in-out;
+}
+@keyframes wave-flow {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50px); }
+}
+
+.animate-wave-flow {
+  animation: wave-flow 2s linear infinite;
+}

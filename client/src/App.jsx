@@ -24,6 +24,7 @@ import Feedback from './pages/Feedback';
 import SLATracker from './pages/SLATracker'; // 1. Import the new page component
 import AuditLogs from './pages/AuditLogs';
 import Departments from './pages/Departments';
+import SystemHealth from './pages/SystemHealth';
 function App() {
   return (
     <>
@@ -148,6 +149,11 @@ function App() {
     </ProtectedRoute>
   } 
 />
+<Route path="/system-health" element={
+  <ProtectedRoute allowAdminOnly={true}>
+    <Layout><SystemHealth /></Layout>
+  </ProtectedRoute>
+} />
         {/* Fallback Redirect */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
