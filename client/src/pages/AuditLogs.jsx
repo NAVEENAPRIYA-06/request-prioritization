@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { ShieldCheck, Clock, User, Activity } from 'lucide-react';
+import { ShieldCheck, Clock, User, AlertCircle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AuditLogs = () => {
@@ -9,81 +9,105 @@ const AuditLogs = () => {
 
   const fetchLogs = async () => {
     try {
-      // Ensure this URL is exactly /api/admin/audit-logs
       const res = await axios.get('http://localhost:5000/api/admin/audit-logs');
       setLogs(res.data);
       setLoading(false);
     } catch (err) {
-      // This is what is triggering your "Audit sync failed" toast
-      console.error("Connection Error:", err);
       toast.error("Audit sync failed");
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchLogs();
+  useEffect(() => { 
+    fetchLogs(); 
   }, []);
+
   return (
     <div className="p-12 animate-in fade-in duration-700 max-w-[1400px] mx-auto text-left">
-      <div className="mb-12">
-        <div className="flex items-center space-x-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">
-          <ShieldCheck size={12} /> <span>System Security</span>
+      {/* HEADER SECTION */}
+      <div className="flex justify-between items-end mb-12">
+        <div>
+          <div className="flex items-center space-x-2 mb-2">
+            <ShieldCheck size={14} className="text-blue-500" />
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">System Security</span>
+          </div>
+          <h2 className="text-5xl font-black text-slate-800 tracking-tighter italic uppercase">
+            Audit <span className="text-blue-600">Intelligence</span>
+          </h2>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Live Chronological System Logs</p>
         </div>
-        <h2 className="text-4xl font-black text-slate-800 tracking-tighter italic uppercase underline decoration-slate-100">Audit Intelligence</h2>
-        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Live Chronological System Logs</p>
+        
+        <button onClick={fetchLogs} className="p-4 bg-white shadow-xl shadow-slate-200/50 rounded-2xl text-slate-400 hover:text-blue-600 transition-all">
+          <RefreshCw size={20} />
+        </button>
       </div>
 
-      <div className="bg-white rounded-[3rem] shadow-2xl shadow-slate-200/40 border border-slate-50 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50/50 border-b border-slate-100">
-              <tr>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Timestamp</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Admin</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Action</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Details</th>
+      {/* AUDIT TABLE CONTAINER */}
+      <div className="bg-white rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-white overflow-hidden">
+        {loading ? (
+          <div className="py-24 text-center animate-pulse">
+            <RefreshCw className="mx-auto text-slate-200 mb-4 animate-spin" size={40} />
+            <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Retrieving Logs...</p>
+          </div>
+        ) : (
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50/50 border-b border-slate-100">
+                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Timestamp</th>
+                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Admin</th>
+                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
+                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Details</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {logs.length > 0 ? logs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-8 py-6">
+                <tr key={log.id} className="hover:bg-blue-50/30 transition-colors group">
+                  <td className="px-10 py-6 flex items-center space-x-3 text-xs font-bold text-slate-400 italic">
+                    <Clock size={14} className="text-slate-300" />
+                    {/* FIXED: Robust Date Formatting to prevent "Invalid Date" */}
+                    <span>{log.created_at ? new Date(log.created_at).toLocaleString('en-US', { 
+                      hour12: true, 
+                      year: 'numeric', 
+                      month: 'numeric', 
+                      day: 'numeric', 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    }) : "Pending..."}</span>
+                  </td>
+                  
+                  <td className="px-10 py-6">
                     <div className="flex items-center space-x-3">
-                      <Clock size={14} className="text-slate-300" />
-                      <span className="text-xs font-bold text-slate-500 italic">
-                        {new Date(log.created_at).toLocaleString()}
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 font-black text-[10px]">
+                        {log.admin_name?.charAt(0) || 'A'}
+                      </div>
+                      <span className="text-xs font-black italic uppercase text-slate-800">
+                        {log.admin_name || 'Admin User'}
                       </span>
                     </div>
                   </td>
-                  <td className="px-8 py-6 text-left">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 font-black text-[10px]">
-                        {log.admin_name.charAt(0)}
-                      </div>
-                      <span className="text-xs font-black text-slate-800 uppercase italic tracking-tight">{log.admin_name}</span>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6 text-left">
-                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-[9px] font-black uppercase tracking-widest">
-                      {log.action_type}
+                  
+                  <td className="px-10 py-6">
+                    {/* FIXED: Vibrant Blue Badge for Action */}
+                    <span className="px-4 py-1.5 bg-blue-600 text-white rounded-full text-[9px] font-black uppercase tracking-widest border border-blue-600 shadow-lg shadow-blue-100">
+                      {log.action || 'SYSTEM'}
                     </span>
                   </td>
-                  <td className="px-8 py-6 text-left">
-                    <p className="text-xs font-medium text-slate-500 italic leading-relaxed">{log.details}</p>
+                  
+                  <td className="px-10 py-6 text-xs font-bold text-slate-600 italic">
+                    {log.details}
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="4" className="py-20 text-center opacity-20">
-                    <Activity size={48} className="mx-auto mb-4" />
-                    <p className="text-xs font-black uppercase tracking-widest">No Intelligence Records Found</p>
+                  <td colSpan="4" className="py-24 text-center">
+                    <AlertCircle size={48} className="mx-auto text-slate-100 mb-4" />
+                    <p className="text-xs font-black text-slate-300 uppercase tracking-[0.5em]">No Logs Recorded</p>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div>
+        )}
       </div>
     </div>
   );
