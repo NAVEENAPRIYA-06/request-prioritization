@@ -22,7 +22,8 @@ import Notifications from './pages/Notifications';
 import HelpCenter from './pages/HelpCenter'; 
 import Feedback from './pages/Feedback';
 import SLATracker from './pages/SLATracker'; // 1. Import the new page component
-
+import AuditLogs from './pages/AuditLogs';
+import Departments from './pages/Departments';
 function App() {
   return (
     <>
@@ -132,6 +133,21 @@ function App() {
           </ProtectedRoute>
         } />
 
+        <Route path="/audit-logs" element={
+  <ProtectedRoute allowAdminOnly={true}>
+    <Layout><AuditLogs /></Layout>
+  </ProtectedRoute>
+} />
+<Route 
+  path="/departments" 
+  element={
+    <ProtectedRoute allowAdminOnly={true}>
+      <Layout>
+        <Departments />
+      </Layout>
+    </ProtectedRoute>
+  } 
+/>
         {/* Fallback Redirect */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>

@@ -1,9 +1,9 @@
-// client/src/components/Sidebar.jsx
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, History, BarChart3, Settings, 
-  LogOut, ClipboardList, PlusCircle, Bell, HelpCircle, Star, Timer 
+  LogOut, ClipboardList, PlusCircle, Bell, HelpCircle, Star, 
+  Timer, ShieldCheck, FolderTree, Activity 
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -25,6 +25,10 @@ const Sidebar = () => {
     { name: 'User Directory', icon: <Users size={20} />, path: '/users' },
     { name: 'Resolved Vault', icon: <History size={20} />, path: '/archives' },
     { name: 'Analytics', icon: <BarChart3 size={20} />, path: '/analytics' },
+    // New menus added to fill the visual gap in AdminHub
+    { name: 'Audit Logs', icon: <ShieldCheck size={20} />, path: '/audit-logs' },
+    { name: 'Departments', icon: <FolderTree size={20} />, path: '/departments' },
+    { name: 'System Health', icon: <Activity size={20} />, path: '/system-health' },
   ];
 
   const employeeLinks = [
@@ -46,7 +50,7 @@ const Sidebar = () => {
         <div className="h-1.5 w-12 bg-white/30 mt-2 rounded-full"></div>
       </div>
 
-      {/* Consolidated Nav - Removes the gap between Notifications and Settings */}
+      {/* Consolidated Nav - Populated with new Admin links to remove the gap */}
       <nav className="px-6 space-y-2 overflow-y-auto custom-scrollbar pb-10">
         {links.map((link) => (
           <button
