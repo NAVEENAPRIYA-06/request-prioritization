@@ -177,6 +177,7 @@ const Dashboard = () => {
               )}
             </div>
           )}
+          
 
           {/* User Profile Card Trigger */}
           <button 

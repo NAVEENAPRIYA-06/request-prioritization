@@ -41,7 +41,8 @@ const AuditLogs = () => {
           <RefreshCw size={20} />
         </button>
       </div>
-
+      
+        
       {/* AUDIT TABLE CONTAINER */}
       <div className="bg-white rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-white overflow-hidden">
         {loading ? (
