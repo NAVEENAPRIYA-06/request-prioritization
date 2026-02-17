@@ -15,12 +15,12 @@ const Settings = () => {
 
   const [name, setName] = useState(user.name || "");
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
-
+const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
   useEffect(() => {
     if (!isAdmin) {
       const fetchUserStats = async () => {
         try {
-          const res = await axios.get(`http://localhost:5000/api/requests/user/${user.id}`);
+          const res = await axios.get(`${API_BASE_URL}/api/requests/user/${user.id}`);
           setStats({
             total: res.data.length,
             resolved: res.data.filter(r => r.status === 'Resolved').length
@@ -42,7 +42,7 @@ const Settings = () => {
     formData.append('profile_pic', file);
 
     try {
-      const res = await axios.put(`http://localhost:5000/api/auth/upload-photo/${user.id}`, formData, {
+      const res = await axios.put(`${API_BASE_URL}/api/auth/upload-photo/${user.id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
@@ -59,7 +59,7 @@ const Settings = () => {
   const handleSaveName = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/auth/update-profile/${user.id}`, { name });
+      await axios.put(`${API_BASE_URL}/api/auth/update-profile/${user.id}`, { name });
       const updatedUser = { ...user, name };
       localStorage.setItem('user', JSON.stringify(updatedUser));
       toast.success("Identity updated successfully");
@@ -73,7 +73,7 @@ const Settings = () => {
     e.preventDefault();
     if (passwords.new !== passwords.confirm) return toast.error("Passwords do not match");
     try {
-      await axios.put(`http://localhost:5000/api/auth/change-password/${user.id}`, {
+      await axios.put(`${API_BASE_URL}/api/auth/change-password/${user.id}`, {
         currentPassword: passwords.current,
         newPassword: passwords.new
       });

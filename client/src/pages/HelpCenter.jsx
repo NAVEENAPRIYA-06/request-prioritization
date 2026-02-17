@@ -11,11 +11,11 @@ const HelpCenter = () => {
   const [guides, setGuides] = useState([]);
   const [selectedGuide, setSelectedGuide] = useState(null);
   const [showCommunity, setShowCommunity] = useState(false);
-
+const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
   useEffect(() => {
     const fetchGuides = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/help/guides');
+        const res = await axios.get(`${API_BASE_URL}/api/help/guides`);
         setGuides(res.data);
       } catch (err) {
         console.error("Error fetching guides:", err);

@@ -6,11 +6,11 @@ import toast from 'react-hot-toast';
 const SLATracker = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-
+const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
   // Fetch metrics and handle auto-escalation logic from the backend
   const fetchSLAMetrics = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/requests/sla-tracker');
+      const res = await axios.get(`${API_BASE_URL}/api/requests/sla-tracker`);
       setRequests(res.data);
       setLoading(false);
     } catch (err) {

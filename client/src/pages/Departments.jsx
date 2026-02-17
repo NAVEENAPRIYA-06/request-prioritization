@@ -8,10 +8,10 @@ const Departments = () => {
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
-
+ const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
   const fetchDepts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/departments');
+      const res = await axios.get(`${API_BASE_URL}/api/admin/departments`);
       setDepts(res.data);
     } catch (err) {
       toast.error("Department sync failed");
@@ -22,7 +22,7 @@ const Departments = () => {
     e.preventDefault();
     if (!newName) return;
     try {
-      await axios.post('http://localhost:5000/api/admin/departments', { 
+      await axios.post(`${API_BASE_URL}/api/admin/departments`, { 
         name: newName, 
         manager_name: "Unassigned Lead" 
       });
@@ -37,7 +37,7 @@ const Departments = () => {
   const handleUpdateLead = async (id) => {
     if (!editName) return;
     try {
-      await axios.put(`http://localhost:5000/api/admin/departments/${id}`, { 
+      await axios.put(`${API_BASE_URL}/api/admin/departments/${id}`, { 
         manager_name: editName 
       });
       setEditingId(null);
@@ -51,7 +51,7 @@ const Departments = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Decommission this department? All history will be archived.")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/departments/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/admin/departments/${id}`);
       toast.success("Department removed");
       fetchDepts();
     } catch (err) {

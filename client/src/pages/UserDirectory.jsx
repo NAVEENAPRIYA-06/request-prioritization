@@ -8,9 +8,10 @@ const UserDirectory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
 const [userStats, setUserStats] = useState({ requests: [], rating: 0 });
+const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/auth/directory');
+      const res = await axios.get(`${API_BASE_URL}/api/auth/directory`);
       setUsers(res.data);
     } catch (err) {
       console.error("Failed to fetch directory");
@@ -22,7 +23,7 @@ const [userStats, setUserStats] = useState({ requests: [], rating: 0 });
   const handleToggleAccess = async (userId, currentStatus) => {
     const newStatus = currentStatus === 'suspended' ? 'active' : 'suspended';
     try {
-      await axios.put(`http://localhost:5000/api/auth/admin/toggle-access/${userId}`, { status: newStatus });
+      await axios.put(`${API_BASE_URL}/api/auth/admin/toggle-access/${userId}`, { status: newStatus });
       toast.success(`Account ${newStatus} successfully`);
       fetchUsers();
     } catch (err) { toast.error("Failed to update access"); }

@@ -6,10 +6,10 @@ import toast from 'react-hot-toast';
 const AuditLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-
+const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
   const fetchLogs = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/audit-logs');
+      const res = await axios.get(`${API_BASE_URL}/api/admin/audit-logs`);
       setLogs(res.data);
       setLoading(false);
     } catch (err) {

@@ -11,7 +11,7 @@ const Register = () => {
     fullName: '', email: '', password: '', role: 'employee' 
   });
   const navigate = useNavigate();
-
+const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
   useEffect(() => {
     setIsVisible(true); // Trigger animation on mount
   }, []);
@@ -19,7 +19,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/auth/register', formData);
+      await axios.post(`${API_BASE_URL}/api/auth/register`, formData);
       toast.success("Account created! Welcome to the team.");
       navigate('/login');
     } catch (err) {

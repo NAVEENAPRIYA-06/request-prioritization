@@ -108,13 +108,14 @@ const Dashboard = () => {
   
   const user = JSON.parse(localStorage.getItem('user'));
   const isAdmin = user?.role === 'admin';
+  const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const url = isAdmin 
-          ? 'http://localhost:5000/api/requests/admin/all' 
-          : `http://localhost:5000/api/requests/user/${user.id}`;
+          ? `${API_BASE_URL}/api/requests/admin/all` 
+          : `${API_BASE_URL}/api/requests/user/${user.id}`;
         const res = await axios.get(url);
         const data = res.data;
         
@@ -135,7 +136,7 @@ const Dashboard = () => {
       }
     };
     fetchDashboardData();
-  }, [isAdmin, user.id]);
+  }, [isAdmin, user.id,API_BASE_URL]);
 
   const circumference = 565.48; 
   const total = stats.total || 1;

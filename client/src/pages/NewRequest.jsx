@@ -14,7 +14,7 @@ const NewRequest = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
-
+const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.description.length < 10) {
@@ -23,7 +23,7 @@ const NewRequest = () => {
 
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/requests/create', { ...formData, userId: user.id });
+      await axios.post(`${API_BASE_URL}/api/requests/create`, { ...formData, userId: user.id });
       toast.success("Request submitted to the priority queue.");
       navigate('/dashboard');
     } catch (err) {
