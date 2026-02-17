@@ -11,8 +11,10 @@ const Login = () => {
   const [isVisible, setIsVisible] = useState(false); // For entrance animation
   const [formData, setFormData] = useState({ email: '', password: '' });
   const navigate = useNavigate();
-  const API_URL = "https://request-prioritization-production.up.railway.app";
-
+  // This line automatically picks the right URL
+const API_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000" 
+  : "https://request-prioritization-production.up.railway.app";
   useEffect(() => {
     setIsVisible(true); // Trigger the animation when the component loads
   }, []);

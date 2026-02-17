@@ -11,7 +11,10 @@ const HelpCenter = () => {
   const [guides, setGuides] = useState([]);
   const [selectedGuide, setSelectedGuide] = useState(null);
   const [showCommunity, setShowCommunity] = useState(false);
-const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
+// This line automatically picks the right URL
+const API_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000" 
+  : "https://request-prioritization-production.up.railway.app";
   useEffect(() => {
     const fetchGuides = async () => {
       try {

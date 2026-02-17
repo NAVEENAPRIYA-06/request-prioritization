@@ -9,10 +9,13 @@ const SystemHealth = () => {
   const [liveMemory, setLiveMemory] = useState(0);
   const [liveUptime, setLiveUptime] = useState(0);
   const [history, setHistory] = useState([true, true, true, true, true, true, true, true, true, true]);
-const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
+// This line automatically picks the right URL
+const API_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000" 
+  : "https://request-prioritization-production.up.railway.app";
   const fetchHealth = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/admin/system-health`);
+      const res = await axios.get(`${API_URL}/api/admin/system-health`);
       setStats(res.data);
       setLiveMemory(parseFloat(res.data.memoryUsage));
       setLiveUptime(parseInt(res.data.uptime));

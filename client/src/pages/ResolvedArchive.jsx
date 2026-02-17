@@ -8,10 +8,13 @@ const ResolvedArchive = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPriority, setFilterPriority] = useState("All");
   const [loading, setLoading] = useState(true);
-const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
+// This line automatically picks the right URL
+const API_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000" 
+  : "https://request-prioritization-production.up.railway.app";
   const fetchArchives = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/requests/admin/archive-search?term=${searchTerm}&priority=${filterPriority}`);
+      const res = await axios.get(`${API_URL}/api/requests/admin/archive-search?term=${searchTerm}&priority=${filterPriority}`);
       setArchives(res.data);
       setLoading(false);
     } catch (err) {
@@ -23,7 +26,7 @@ const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
   // NEW: Handle CSV Data Export
   const handleExport = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/requests/admin/export-data`);
+      const res = await axios.get(`${API_URL}/api/requests/admin/export-data`);
       const data = res.data;
 
       if (!data || data.length === 0) {

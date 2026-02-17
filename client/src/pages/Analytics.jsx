@@ -7,11 +7,14 @@ const Analytics = () => {
   const [stats, setStats] = useState({ total: 0, resolved: 0, pending: 0, urgent: 0 });
   const [feedback, setFeedback] = useState({ averageRating: 0, latestFeedback: [] });
   const [loading, setLoading] = useState(true);
-  const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
+  // This line automatically picks the right URL
+const API_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000" 
+  : "https://request-prioritization-production.up.railway.app";
   useEffect(() => {
     const fetchAllMetrics = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/requests/admin/stats-full`);
+        const res = await axios.get(`${API_URL}/api/requests/admin/stats-full`);
         const { requests = [], averageRating = 0, latestFeedback = [] } = res.data;
 
         setStats({

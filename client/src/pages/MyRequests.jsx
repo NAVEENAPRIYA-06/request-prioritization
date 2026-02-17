@@ -15,10 +15,13 @@ const MyRequests = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
-const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
+// This line automatically picks the right URL
+const API_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000" 
+  : "https://request-prioritization-production.up.railway.app";
   const fetchRequests = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/requests/user/${user.id}`);
+      const res = await axios.get(`${API_URL}/api/requests/user/${user.id}`);
       setRequests(res.data);
     } catch (err) {
       toast.error("Sync failed");
@@ -29,7 +32,7 @@ const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
 
   const confirmCancel = async () => {
     try {
-      await axios.delete(`${API_BASE_URL}/api/requests/delete/${requestToCancel.id}`);
+      await axios.delete(`${API_URL}/api/requests/delete/${requestToCancel.id}`);
       toast.success("Request successfully removed");
       setRequestToCancel(null);
       fetchRequests();

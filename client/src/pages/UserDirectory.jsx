@@ -8,10 +8,13 @@ const UserDirectory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
 const [userStats, setUserStats] = useState({ requests: [], rating: 0 });
-const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
+// This line automatically picks the right URL
+const API_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000" 
+  : "https://request-prioritization-production.up.railway.app";
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/auth/directory`);
+      const res = await axios.get(`${API_URL}/api/auth/directory`);
       setUsers(res.data);
     } catch (err) {
       console.error("Failed to fetch directory");

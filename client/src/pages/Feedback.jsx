@@ -8,7 +8,10 @@ const Feedback = () => {
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
+c// This line automatically picks the right URL
+const API_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000" 
+  : "https://request-prioritization-production.up.railway.app";
   // Get current logged-in user details
   const user = JSON.parse(localStorage.getItem('user'));
 
@@ -24,7 +27,7 @@ const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
 
     try {
       // Send feedback data to the backend
-      await axios.post(`${API_BASE_URL}/api/feedback/submit`, {
+      await axios.post(`${API_URL}/api/feedback/submit`, {
         user_id: user.id,
         rating: rating,
         comment: comment

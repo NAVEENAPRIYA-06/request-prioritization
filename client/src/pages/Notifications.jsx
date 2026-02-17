@@ -5,12 +5,15 @@ import { Bell, Clock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react'
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const user = JSON.parse(localStorage.getItem('user'));
-const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
+// This line automatically picks the right URL
+const API_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000" 
+  : "https://request-prioritization-production.up.railway.app";
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         // Fetching user's specific requests to track changes
-        const res = await axios.get(`${API_BASE_URL}/api/requests/user/${user.id}`);
+        const res = await axios.get(`${API_URL}/api/requests/user/${user.id}`);
         // Sorting by updated_at so newest changes appear first
         const sorted = res.data.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
         setNotifications(sorted);

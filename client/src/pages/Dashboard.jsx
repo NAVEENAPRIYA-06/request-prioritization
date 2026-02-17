@@ -108,14 +108,17 @@ const Dashboard = () => {
   
   const user = JSON.parse(localStorage.getItem('user'));
   const isAdmin = user?.role === 'admin';
-  const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
+  // This line automatically picks the right URL
+const API_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000" 
+  : "https://request-prioritization-production.up.railway.app";
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const url = isAdmin 
-          ? `${API_BASE_URL}/api/requests/admin/all` 
-          : `${API_BASE_URL}/api/requests/user/${user.id}`;
+          ? `${API_URL}/api/requests/admin/all` 
+          : `${API_URL}/api/requests/user/${user.id}`;
         const res = await axios.get(url);
         const data = res.data;
         

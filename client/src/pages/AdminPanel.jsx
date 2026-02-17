@@ -10,10 +10,13 @@ const AdminPanel = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
-  const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
+  // This line automatically picks the right URL
+const API_URL = window.location.hostname === "localhost" 
+  ? "http://localhost:5000" 
+  : "https://request-prioritization-production.up.railway.app";
   const fetchAllData = async () => {
     try {
-     const res = await axios.get(`${API_BASE_URL}/api/requests/admin/all`);
+     const res = await axios.get(`${API_URL}/api/requests/admin/all`);
       // Filter out both Resolved and Rejected from the active Control Center view
       setAllRequests(res.data.filter(req => req.status !== 'Resolved' && req.status !== 'Rejected'));
     } catch (err) {
@@ -25,7 +28,7 @@ const AdminPanel = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await axios.put(`${API_BASE_URL}/api/requests/update-status/${id}`, { status: newStatus });
+      await axios.put(`${API_URL}/api/requests/update-status/${id}`, { status: newStatus });
       toast.success(`Priority updated to ${newStatus}`);
       // Remove from view if Resolved or Rejected
       if (newStatus === 'Resolved' || newStatus === 'Rejected') {
