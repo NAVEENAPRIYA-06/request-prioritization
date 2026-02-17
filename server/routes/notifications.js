@@ -25,4 +25,22 @@ router.put('/read/:id', async (req, res) => {
     }
 });
 
+// server/routes/notifications.js
+
+router.get('/user-feed/:id', async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const [rows] = await db.query(`
+            SELECT n.*, r.title as request_title 
+            FROM notifications n
+            LEFT JOIN requests r ON n.request_id = r.id
+            WHERE n.user_id = ?
+            ORDER BY n.created_at DESC LIMIT 20
+        `, [userId]);
+        res.status(200).json(rows);
+    } catch (err) {
+        res.status(500).json({ message: "Failed to sync notification intelligence" });
+    }
+});
+
 module.exports = router;

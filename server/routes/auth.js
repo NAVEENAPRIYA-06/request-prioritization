@@ -4,6 +4,7 @@ const db = require('../config/db');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const API_BASE_URL = "https://request-prioritization-production.up.railway.app";
 // Registration Route
 router.post('/register', async (req, res) => {
     const { fullName, email, password, role } = req.body;

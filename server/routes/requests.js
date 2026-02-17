@@ -472,6 +472,281 @@ router.get('/admin/stats-full', async (req, res) => {
         res.status(500).json({ message: "Error fetching system metrics", error: err });
     }
 });
+// server/routes/feedback.js
 
+// GET: Feedback Distribution and Average
+router.get('/stats', async (req, res) => {
+    try {
+        const [distRows] = await db.query(`
+            SELECT rating, COUNT(*) as count 
+            FROM feedback 
+            GROUP BY rating 
+            ORDER BY rating DESC
+        `);
+        
+        const [avgRows] = await db.query("SELECT AVG(rating) as average FROM feedback");
+
+        res.status(200).json({
+            distribution: distRows,
+            average: parseFloat(avgRows[0].average || 0).toFixed(1)
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching feedback stats" });
+    }
+});
+
+// server/routes/requests.js
+
+router.put('/admin/update-status', async (req, res) => {
+    const { request_id, status, admin_id, note } = req.body;
+
+    try {
+        // 1. Update the request status
+        await db.query(
+            "UPDATE requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            [status, request_id]
+        );
+
+        // 2. Create the Admin Log entry
+        await db.query(
+            "INSERT INTO admin_logs (admin_id, request_id, action_type, action_note) VALUES (?, ?, ?, ?)",
+            [admin_id, request_id, status, note || `Request moved to ${status}`]
+        );
+
+        res.status(200).json({ message: `Request ${status} successfully and logged.` });
+    } catch (err) {
+        res.status(500).json({ message: "Action failed", error: err });
+    }
+});
+
+// server/routes/requests.js
+
+router.get('/admin/stats-full', async (req, res) => {
+    try {
+        // Fetch all requests for volume stats
+        const [requests] = await db.query("SELECT status, priority FROM requests");
+        
+        // Fetch average rating for the Service Quality widget
+        const [avgRows] = await db.query("SELECT AVG(rating) as averageRating FROM feedback");
+        
+        // Fetch latest feedback entries
+        const [latestFeedback] = await db.query(`
+            SELECT f.*, u.name as user_name 
+            FROM feedback f 
+            JOIN users u ON f.user_id = u.id 
+            ORDER BY f.created_at DESC LIMIT 3
+        `);
+
+        res.status(200).json({
+            requests,
+            averageRating: avgRows[0].averageRating || 0,
+            latestFeedback
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Analytics query failed" });
+    }
+});
+
+// server/routes/requests.js
+
+// GET: Advanced Search for Resolved Archive
+router.get('/admin/archive-search', async (req, res) => {
+    const { term, priority } = req.query;
+    
+    try {
+        let query = `
+            SELECT r.*, u.name as user_name 
+            FROM requests r 
+            JOIN users u ON r.user_id = u.id 
+            WHERE r.status = 'Resolved'
+        `;
+        const params = [];
+
+        if (term) {
+            query += ` AND (u.name LIKE ? OR r.title LIKE ?)`;
+            params.push(`%${term}%`, `%${term}%`);
+        }
+
+        if (priority && priority !== 'All') {
+            query += ` AND r.priority = ?`;
+            params.push(priority);
+        }
+
+        query += ` ORDER BY r.updated_at DESC`;
+
+        const [rows] = await db.query(query, params);
+        res.status(200).json(rows);
+    } catch (err) {
+        res.status(500).json({ message: "Archive retrieval failed" });
+    }
+});
+// server/routes/requests.js
+
+router.get('/sla-tracker', async (req, res) => {
+    try {
+        // Fetch only active (non-resolved) requests
+        const [rows] = await db.query(`
+            SELECT id, title, priority, created_at, status 
+            FROM requests 
+            WHERE status != 'Resolved'
+            ORDER BY created_at ASC
+        `);
+
+        const trackedRequests = rows.map(req => {
+            const createdDate = new Date(req.created_at);
+            const now = new Date();
+            
+            // Define SLA hours based on priority
+            const slaHours = req.priority === 'Critical' ? 4 : req.priority === 'High' ? 24 : 72;
+            const deadline = new Date(createdDate.getTime() + slaHours * 60 * 60 * 1000);
+            const diffMs = deadline - now;
+            
+            return {
+                ...req,
+                deadline,
+                msRemaining: diffMs,
+                isOverdue: diffMs < 0,
+                isNearDeadline: diffMs > 0 && diffMs < (slaHours * 0.2 * 60 * 60 * 1000), // Last 20% of time
+                autoEscalation: diffMs < 0 && req.priority !== 'Critical' ? 'Active' : 'N/A'
+            };
+        });
+
+        res.status(200).json(trackedRequests);
+    } catch (err) {
+        res.status(500).json({ message: "SLA synchronization failed" });
+    }
+});
+// server/routes/requests.js
+const { sendSLAAlert } = require('../utils/mailer');
+
+router.get('/sla-tracker', async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT r.*, u.email as user_email 
+            FROM requests r 
+            JOIN users u ON r.user_id = u.id 
+            WHERE r.status != 'Resolved'
+        `);
+
+        // Logic to trigger email if isOverdue is true and alert hasn't been sent
+        rows.forEach(async (req) => {
+            const deadline = new Date(new Date(req.created_at).getTime() + 4 * 60 * 60 * 1000); // Example 4h SLA
+            if (new Date() > deadline && req.priority !== 'Critical') {
+                // This is where you would call sendSLAAlert(req.user_email, req.title, 'Overdue');
+            }
+        });
+
+        // ... existing map logic for frontend ...
+        res.status(200).json(processedRows);
+    } catch (err) {
+        res.status(500).json({ message: "SLA sync failed" });
+    }
+});
+// server/routes/requests.js
+
+router.get('/sla-tracker', async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT id, title, priority, created_at, status 
+            FROM requests 
+            WHERE status != 'Resolved'
+        `);
+
+        const updatedRequests = await Promise.all(rows.map(async (req) => {
+            const createdDate = new Date(req.created_at);
+            const now = new Date();
+            
+            // Priority-based SLA Hours
+            const slaHours = req.priority === 'Critical' ? 4 : req.priority === 'High' ? 24 : 72;
+            const deadline = new Date(createdDate.getTime() + slaHours * 60 * 60 * 1000);
+            const diffMs = deadline - now;
+            
+            let currentPriority = req.priority;
+            let autoEscalated = false;
+
+            // Auto-Escalation Logic: If overdue and not yet Critical, bump it up
+            if (diffMs < 0 && req.priority !== 'Critical') {
+                const nextPriority = req.priority === 'Low' ? 'Medium' : req.priority === 'Medium' ? 'High' : 'Critical';
+                
+                // Update the database permanently
+                await db.query("UPDATE requests SET priority = ? WHERE id = ?", [nextPriority, req.id]);
+                currentPriority = nextPriority;
+                autoEscalated = true;
+            }
+
+            return {
+                ...req,
+                priority: currentPriority,
+                deadline,
+                msRemaining: diffMs,
+                isOverdue: diffMs < 0,
+                autoEscalation: autoEscalated ? 'Active' : 'N/A'
+            };
+        }));
+
+        res.status(200).json(updatedRequests);
+    } catch (err) {
+        res.status(500).json({ message: "Auto-escalation sync failed" });
+    }
+});
+// server/routes/requests.js
+
+// GET: Export Resolved Data as JSON/CSV
+router.get('/admin/export-data', async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT 
+                r.id as Request_ID, 
+                u.name as Requester, 
+                r.title as Subject, 
+                r.priority as Priority, 
+                r.category as Category,
+                r.status as Status,
+                r.created_at as Created_Date,
+                r.updated_at as Resolved_Date
+            FROM requests r 
+            JOIN users u ON r.user_id = u.id 
+            WHERE r.status = 'Resolved'
+            ORDER BY r.updated_at DESC
+        `);
+        res.status(200).json(rows);
+    } catch (err) {
+        res.status(500).json({ message: "Export failed" });
+    }
+});
+
+// server/routes/requests.js
+
+// GET: Export Resolved Intelligence Data
+router.get('/admin/export-data', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                r.id AS 'Request ID',
+                u.name AS 'Requester Name',
+                r.title AS 'Subject',
+                r.category AS 'Category',
+                r.priority AS 'Final Priority',
+                r.status AS 'Current Status',
+                DATE_FORMAT(r.created_at, '%Y-%m-%d %H:%i') AS 'Created At',
+                DATE_FORMAT(r.updated_at, '%Y-%m-%d %H:%i') AS 'Resolved At'
+            FROM requests r
+            JOIN users u ON r.user_id = u.id
+            WHERE r.status = 'Resolved'
+            ORDER BY r.updated_at DESC
+        `;
+
+        const [rows] = await db.query(query);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "No resolved data found for export" });
+        }
+
+        res.status(200).json(rows);
+    } catch (err) {
+        console.error("Export Error:", err);
+        res.status(500).json({ message: "Internal Server Error during export" });
+    }
+});
 
 module.exports = router;
