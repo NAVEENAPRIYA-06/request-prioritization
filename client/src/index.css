@@ -44,154 +44,40 @@ body {
 .animate-wave-flow {
   animation: wave-flow 2s linear infinite;
 }
-/* Automatically makes grids responsive without touching JSX */
-.grid {
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: 1fr !important; /* Default to 1 column */
-}
 
-@media (min-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr) !important; /* 2 columns for tablets */
-  }
-}
+/* --- RESPONSIVE OVERRIDES (MOBILE ONLY) --- */
 
-@media (min-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr) !important; /* 3 columns for desktop */
-  }
-}
-/* Prevents tables from stretching the mobile screen */
-.overflow-x-auto {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-table {
-  min-width: 800px; /* Keeps the table readable while allowing scrolling */
-}
-/* On desktop (above 1024px), push content to the right of the sidebar */
-@media (min-width: 1024px) {
-  main {
-    padding-left: 288px !important; /* 288px is the width of 72 units */
-  }
-}
-
-/* On mobile, remove the padding so content fills the screen */
-@media (max-width: 1023px) {
-  main {
-    padding-left: 0 !important;
-    padding-top: 64px; /* Space for a top bar if you have one */
-  }
-}
-/* On Mobile (Screens smaller than 1024px) */
-@media (max-width: 1023px) {
-  /* This targets the sidebar container specifically */
-  aside, .sidebar-container, div[class*="fixed left-0"] {
-    transform: translateX(-100%); /* Move it off screen */
-    transition: transform 0.3s ease;
-    z-index: 100;
-  }
-
-  /* Show sidebar when user swipes or hovers near the left edge */
-  aside:hover, .sidebar-container:hover, div[class*="fixed left-0"]:hover {
-    transform: translateX(0);
-  }
-
-  /* Make sure the main content takes up the WHOLE screen */
-  main, .main-content, div[class*="flex-1"] {
-    margin-left: 0 !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    width: 100% !important;
-  }
-}
-
-/* Stacks priority buttons vertically on mobile */
-@media (max-width: 640px) {
-  .priority-button-container, div[class*="grid-cols-4"] {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-/* On Mobile (Screens smaller than 1024px) */
-@media (max-width: 1023px) {
-  /* This targets the sidebar container specifically */
-  aside, .sidebar-container, div[class*="fixed left-0"] {
-    transform: translateX(-100%); /* Move it off screen */
-    transition: transform 0.3s ease;
-    z-index: 100;
-  }
-
-  /* Show sidebar when user swipes or hovers near the left edge */
-  aside:hover, .sidebar-container:hover, div[class*="fixed left-0"]:hover {
-    transform: translateX(0);
-  }
-
-  /* Make sure the main content takes up the WHOLE screen */
-  main, .main-content, div[class*="flex-1"] {
-    margin-left: 0 !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    width: 100% !important;
-  }
-}
-@media (max-width: 1023px) {
-  /* Sidebar starts off-screen */
-  aside, .sidebar-container, div[class*="fixed left-0"] {
-    transform: translateX(-100%);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 9999 !important;
-    box-shadow: 10px 0 30px rgba(0,0,0,0.2);
-  }
-
-  /* When the 'active' class is added via JS, it slides in */
-  .sidebar-active {
-    transform: translateX(0) !important;
-  }
-
-  /* Main content takes full width */
-  main, div[class*="flex-1"] {
-    margin-left: 0 !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    padding-top: 80px !important; /* Space for the new mobile toggle */
-    width: 100% !important;
-  }
-}
-@media (max-width: 1023px) {
-  /* Ensure the sidebar stays hidden by default */
+@media (max-width: 1024px) {
+  /* 1. Sidebar Control: Move it off-screen so it doesn't block Mariya's stats  */
   div[class*="fixed left-0"] {
     transform: translateX(-100%);
-    transition: transform 0.5s ease !important;
+    transition: transform 0.4s ease-in-out !important;
   }
 
-  /* This is the class React adds when isMobileOpen is true */
-  /* We use !important to make sure it beats any other 'fixed' rules */
+  /* 2. Slide-in effect when active  */
   .translate-x-0 {
     transform: translateX(0) !important;
-    display: flex !important;
-    visibility: visible !important;
   }
-}
-/* Prevent horizontal overflow globally */
-body, #root {
-  overflow-x: hidden;
-  width: 100vw;
-}
 
-/* Ensure images and large inputs don't break containers */
-img, input, textarea, select {
-  max-width: 100%;
-}
+  /* 3. The Dashboard Fix: Stack the 4 bento cards vertically on phones  */
+  /* This prevents the squashed row look in your iPhone 14 screenshot */
+  div[class*="grid-cols-4"], 
+  div[class*="grid-cols-3"],
+  .grid {
+    grid-template-columns: 1fr !important; 
+    gap: 1.5rem !important;
+  }
 
-/* Custom scrollbar for the table swiping */
-.overflow-x-auto::-webkit-scrollbar {
-  height: 6px;
-}
-.overflow-x-auto::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
+  /* 4. Padding Adjustment: Removes the 72-unit gap used for the desktop sidebar  */
+  main, .main-content {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+    padding-top: 100px !important; /* Space for your floating menu button  */
+    margin-left: 0 !important;
+  }
+  
+  /* 5. Heading scaling for smaller screens  */
+  h2 {
+    font-size: 1.875rem !important; /* text-3xl  */
+  }
 }
