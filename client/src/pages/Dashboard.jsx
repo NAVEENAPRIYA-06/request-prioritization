@@ -128,7 +128,7 @@ const Dashboard = () => {
         });
 
         if (isAdmin) {
-          const feedbackRes = await axios.get('http://localhost:5000/api/feedback/admin/notifications');
+          const feedbackRes = await axios.get(`${API_BASE_URL}/api/feedback/admin/notifications`);
           setAdminFeedback(feedbackRes.data);
         }
       } catch (err) {
