@@ -1,4 +1,4 @@
-# SmartService | Enterprise Request Prioritization Tool
+# SmartService | Request Prioritization Tool
 
 SmartService is a full-stack dashboard designed for construction and enterprise environments to manage service requests efficiently. It features a robust **Role-Based Access Control (RBAC)** system, allowing admins to manage workflows and employees to track their requests in real-time.
 
@@ -28,15 +28,3 @@ SmartService is a full-stack dashboard designed for construction and enterprise 
 
 ---
 
-## ⚙️ Local Setup Instructions
-
-### 1. Database Configuration
-1. Open **phpMyAdmin**.
-2. Create a database named `request_tool_db`.
-3. Import the provided SQL schema to create `users`, `requests`, and `departments` tables.
-
-### 2. Backend Setup
-```bash
-cd server
-npm install
-npm start
