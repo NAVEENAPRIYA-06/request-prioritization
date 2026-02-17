@@ -8,33 +8,33 @@ import ForgotPasswordModal from '../components/ForgotPasswordModal';
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(false); // For entrance animation
+  const [isVisible, setIsVisible] = useState(false); 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const navigate = useNavigate();
-  // This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
-  useEffect(() => {
-    setIsVisible(true); // Trigger the animation when the component loads
-  }, []);
 
+  // RESTORED: Hardcoded back to your local server only
+  const API_URL = "http://localhost:5000";
+
+  useEffect(() => {
+    setIsVisible(true); 
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+      // Points directly to your local node server
       const response = await axios.post(`${API_URL}/api/auth/login`, formData);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       toast.success(`Welcome back, ${response.data.user.name}`);
       navigate('/dashboard');
     } catch (err) {
+      // If this fails, check if your local server is running in the terminal
       toast.error(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e293b] via-[#334155] to-[#8e4585] p-6 overflow-hidden">
-      {/* Animation wrapper: uses isVisible to control opacity and position */}
       <div className={`flex flex-col md:flex-row w-full max-w-4xl bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/20 transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'}`}>
         
         {/* Left Brand Panel */}
@@ -105,7 +105,6 @@ const API_URL = window.location.hostname === "localhost"
         </div>
       </div>
 
-      {/* Forgot Password Modal */}
       <ForgotPasswordModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );

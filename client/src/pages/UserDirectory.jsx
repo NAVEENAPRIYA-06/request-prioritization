@@ -7,14 +7,12 @@ const UserDirectory = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
-const [userStats, setUserStats] = useState({ requests: [], rating: 0 });
-// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+  const [userStats, setUserStats] = useState({ requests: [], rating: 0 });
+
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/auth/directory`);
+      // RESTORED: Hardcoded to local server
+      const res = await axios.get('http://localhost:5000/api/auth/directory');
       setUsers(res.data);
     } catch (err) {
       console.error("Failed to fetch directory");
@@ -26,7 +24,8 @@ const API_URL = window.location.hostname === "localhost"
   const handleToggleAccess = async (userId, currentStatus) => {
     const newStatus = currentStatus === 'suspended' ? 'active' : 'suspended';
     try {
-      await axios.put(`${API_BASE_URL}/api/auth/admin/toggle-access/${userId}`, { status: newStatus });
+      // RESTORED: Hardcoded to local server
+      await axios.put(`http://localhost:5000/api/auth/admin/toggle-access/${userId}`, { status: newStatus });
       toast.success(`Account ${newStatus} successfully`);
       fetchUsers();
     } catch (err) { toast.error("Failed to update access"); }

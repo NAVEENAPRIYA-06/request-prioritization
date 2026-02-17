@@ -8,13 +8,11 @@ const Departments = () => {
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
- // This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+
   const fetchDepts = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/admin/departments`);
+      // RESTORED: Hardcoded to local server
+      const res = await axios.get('http://localhost:5000/api/admin/departments');
       setDepts(res.data);
     } catch (err) {
       toast.error("Department sync failed");
@@ -25,7 +23,8 @@ const API_URL = window.location.hostname === "localhost"
     e.preventDefault();
     if (!newName) return;
     try {
-      await axios.post(`${API_URL}/api/admin/departments`, { 
+      // RESTORED: Hardcoded to local server
+      await axios.post('http://localhost:5000/api/admin/departments', { 
         name: newName, 
         manager_name: "Unassigned Lead" 
       });
@@ -40,7 +39,8 @@ const API_URL = window.location.hostname === "localhost"
   const handleUpdateLead = async (id) => {
     if (!editName) return;
     try {
-      await axios.put(`${API_URL}/api/admin/departments/${id}`, { 
+      // RESTORED: Hardcoded to local server
+      await axios.put(`http://localhost:5000/api/admin/departments/${id}`, { 
         manager_name: editName 
       });
       setEditingId(null);
@@ -54,7 +54,8 @@ const API_URL = window.location.hostname === "localhost"
   const handleDelete = async (id) => {
     if (!window.confirm("Decommission this department? All history will be archived.")) return;
     try {
-      await axios.delete(`${API_URL}/api/admin/departments/${id}`);
+      // RESTORED: Hardcoded to local server
+      await axios.delete(`http://localhost:5000/api/admin/departments/${id}`);
       toast.success("Department removed");
       fetchDepts();
     } catch (err) {
@@ -68,7 +69,6 @@ const API_URL = window.location.hostname === "localhost"
 
   return (
     <div className="p-12 animate-in fade-in duration-700 max-w-[1400px] mx-auto text-left">
-      {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
         <div>
           <h2 className="text-4xl font-black text-slate-800 tracking-tighter italic uppercase underline decoration-slate-100">Departments</h2>
@@ -88,12 +88,10 @@ const API_URL = window.location.hostname === "localhost"
         </form>
       </div>
 
-      {/* DEPARTMENT GRID & CONDITIONAL RENDERING */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {depts.length > 0 ? (
           depts.map((dept) => (
             <div key={dept.id} className="bg-white p-8 rounded-[3.5rem] shadow-2xl shadow-slate-200/50 border border-white group relative overflow-hidden transition-all hover:scale-[1.02]">
-              
               <div className="absolute -right-4 -top-4 text-slate-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                 <FolderTree size={120} />
               </div>

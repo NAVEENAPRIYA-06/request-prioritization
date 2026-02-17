@@ -8,10 +8,10 @@ const ResolvedArchive = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPriority, setFilterPriority] = useState("All");
   const [loading, setLoading] = useState(true);
-// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+
+  // RESTORED: Hardcoded to local server
+  const API_URL = "http://localhost:5000";
+
   const fetchArchives = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/requests/admin/archive-search?term=${searchTerm}&priority=${filterPriority}`);
@@ -23,7 +23,6 @@ const API_URL = window.location.hostname === "localhost"
     }
   };
 
-  // NEW: Handle CSV Data Export
   const handleExport = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/requests/admin/export-data`);
@@ -34,7 +33,6 @@ const API_URL = window.location.hostname === "localhost"
         return;
       }
 
-      // Create CSV Headers and Rows
       const headers = Object.keys(data[0]).join(",");
       const rows = data.map(row => 
         Object.values(row).map(value => `"${value}"`).join(",")
@@ -42,7 +40,6 @@ const API_URL = window.location.hostname === "localhost"
       
       const csvContent = `data:text/csv;charset=utf-8,${headers}\n${rows}`;
       
-      // Trigger Download
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
@@ -69,9 +66,7 @@ const API_URL = window.location.hostname === "localhost"
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">Audit Resolved Intelligence & History</p>
         </div>
 
-        {/* Action Controls */}
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
-          {/* Search Bar */}
           <div className="relative group w-full sm:w-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={16} />
             <input 
@@ -82,7 +77,6 @@ const API_URL = window.location.hostname === "localhost"
             />
           </div>
 
-          {/* Priority Filter */}
           <select 
             className="px-6 py-4 rounded-2xl bg-white shadow-xl shadow-slate-200/20 border-none outline-none font-black text-[10px] uppercase tracking-widest text-slate-500 appearance-none cursor-pointer w-full sm:w-auto"
             onChange={(e) => setFilterPriority(e.target.value)}
@@ -94,7 +88,6 @@ const API_URL = window.location.hostname === "localhost"
             <option value="Low">Low</option>
           </select>
 
-          {/* NEW: Export Button */}
           <button 
             onClick={handleExport}
             className="flex items-center justify-center space-x-3 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-[#0077be] transition-all shadow-xl shadow-slate-200/40 group w-full sm:w-auto"
@@ -105,7 +98,6 @@ const API_URL = window.location.hostname === "localhost"
         </div>
       </div>
 
-      {/* Archive Grid */}
       {loading ? (
         <div className="text-center py-20 font-black text-slate-200 animate-pulse uppercase tracking-[0.5em]">Syncing Archive...</div>
       ) : (

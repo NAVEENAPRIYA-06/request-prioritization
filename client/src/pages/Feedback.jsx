@@ -8,10 +8,7 @@ const Feedback = () => {
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-c// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+
   // Get current logged-in user details
   const user = JSON.parse(localStorage.getItem('user'));
 
@@ -26,8 +23,8 @@ const API_URL = window.location.hostname === "localhost"
     setIsSubmitting(true);
 
     try {
-      // Send feedback data to the backend
-      await axios.post(`${API_URL}/api/feedback/submit`, {
+      // RESTORED: Hardcoded to local server
+      await axios.post('http://localhost:5000/api/feedback/submit', {
         user_id: user.id,
         rating: rating,
         comment: comment
@@ -35,7 +32,6 @@ const API_URL = window.location.hostname === "localhost"
 
       toast.success("Thank you! Your feedback has been recorded.");
       
-      // Reset form state after successful submission
       setRating(0);
       setComment("");
     } catch (err) {
@@ -48,7 +44,6 @@ const API_URL = window.location.hostname === "localhost"
 
   return (
     <div className="p-8 md:p-12 animate-in fade-in duration-700 max-w-4xl mx-auto">
-      {/* Header Section */}
       <div className="mb-12">
         <h2 className="text-5xl font-black text-[#8e4585] tracking-tighter italic uppercase underline decoration-slate-200">
           Feedback
@@ -58,7 +53,6 @@ const API_URL = window.location.hostname === "localhost"
         </p>
       </div>
 
-      {/* Feedback Form Card */}
       <form 
         onSubmit={handleSubmit} 
         className="bg-white p-12 rounded-[4rem] shadow-2xl shadow-slate-200/40 border border-white"
@@ -70,7 +64,6 @@ const API_URL = window.location.hostname === "localhost"
             Select a star rating below
           </p>
           
-          {/* Interactive Star Rating System */}
           <div className="flex space-x-3 mt-8">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -92,7 +85,6 @@ const API_URL = window.location.hostname === "localhost"
           </div>
         </div>
 
-        {/* Comment Section */}
         <div className="space-y-4">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-4">
             Comments (Optional)
@@ -106,7 +98,6 @@ const API_URL = window.location.hostname === "localhost"
           />
         </div>
 
-        {/* Submit Button */}
         <button 
           type="submit" 
           disabled={isSubmitting}

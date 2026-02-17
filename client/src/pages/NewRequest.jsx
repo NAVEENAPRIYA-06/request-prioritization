@@ -14,10 +14,7 @@ const NewRequest = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
-// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.description.length < 10) {
@@ -26,7 +23,8 @@ const API_URL = window.location.hostname === "localhost"
 
     setLoading(true);
     try {
-      await axios.post(`${API_URL}/api/requests/create`, { ...formData, userId: user.id });
+      // RESTORED: Hardcoded to local server
+      await axios.post('http://localhost:5000/api/requests/create', { ...formData, userId: user.id });
       toast.success("Request submitted to the priority queue.");
       navigate('/dashboard');
     } catch (err) {

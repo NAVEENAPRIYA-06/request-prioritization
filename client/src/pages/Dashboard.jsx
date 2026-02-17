@@ -108,17 +108,15 @@ const Dashboard = () => {
   
   const user = JSON.parse(localStorage.getItem('user'));
   const isAdmin = user?.role === 'admin';
-  // This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        // RESTORED: Direct local endpoints
         const url = isAdmin 
-          ? `${API_URL}/api/requests/admin/all` 
-          : `${API_URL}/api/requests/user/${user.id}`;
+          ? `http://localhost:5000/api/requests/admin/all` 
+          : `http://localhost:5000/api/requests/user/${user.id}`;
+        
         const res = await axios.get(url);
         const data = res.data;
         
@@ -131,7 +129,7 @@ const API_URL = window.location.hostname === "localhost"
         });
 
         if (isAdmin) {
-          const feedbackRes = await axios.get(`${API_BASE_URL}/api/feedback/admin/notifications`);
+          const feedbackRes = await axios.get(`http://localhost:5000/api/feedback/admin/notifications`);
           setAdminFeedback(feedbackRes.data);
         }
       } catch (err) {
@@ -139,7 +137,7 @@ const API_URL = window.location.hostname === "localhost"
       }
     };
     fetchDashboardData();
-  }, [isAdmin, user.id,API_BASE_URL]);
+  }, [isAdmin, user.id]);
 
   const circumference = 565.48; 
   const total = stats.total || 1;

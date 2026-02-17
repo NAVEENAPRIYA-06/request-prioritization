@@ -15,13 +15,11 @@ const MyRequests = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
-// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+
   const fetchRequests = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/requests/user/${user.id}`);
+      // RESTORED: Hardcoded to local server
+      const res = await axios.get(`http://localhost:5000/api/requests/user/${user.id}`);
       setRequests(res.data);
     } catch (err) {
       toast.error("Sync failed");
@@ -32,7 +30,8 @@ const API_URL = window.location.hostname === "localhost"
 
   const confirmCancel = async () => {
     try {
-      await axios.delete(`${API_URL}/api/requests/delete/${requestToCancel.id}`);
+      // RESTORED: Hardcoded to local server
+      await axios.delete(`http://localhost:5000/api/requests/delete/${requestToCancel.id}`);
       toast.success("Request successfully removed");
       setRequestToCancel(null);
       fetchRequests();
@@ -48,7 +47,6 @@ const API_URL = window.location.hostname === "localhost"
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-20 font-sans">
-      {/* Premium Glass Header */}
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
         <div className="max-w-7xl mx-auto px-10 py-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center space-x-6">
@@ -89,7 +87,6 @@ const API_URL = window.location.hostname === "localhost"
             <tbody className="divide-y divide-slate-50">
               {filteredRequests.map((req) => (
                 <tr key={req.id} className="hover:bg-purple-50/30 transition-all group cursor-pointer">
-                  {/* High Visibility Reference Number */}
                   <td className="p-10" onClick={() => setSelectedRequest(req)}>
                     <span className="font-mono text-xs font-black text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg group-hover:bg-white group-hover:text-[#8e4585] transition-all">
                       #REQ-{req.id}

@@ -9,18 +9,15 @@ const SystemHealth = () => {
   const [liveMemory, setLiveMemory] = useState(0);
   const [liveUptime, setLiveUptime] = useState(0);
   const [history, setHistory] = useState([true, true, true, true, true, true, true, true, true, true]);
-// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+
   const fetchHealth = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/admin/system-health`);
+      // RESTORED: Hardcoded to local server
+      const res = await axios.get('http://localhost:5000/api/admin/system-health');
       setStats(res.data);
       setLiveMemory(parseFloat(res.data.memoryUsage));
       setLiveUptime(parseInt(res.data.uptime));
       
-      // Update Heartbeat History (Shift old, add new)
       setHistory(prev => [...prev.slice(1), true]);
       setLoading(false);
     } catch (err) {
@@ -32,10 +29,8 @@ const API_URL = window.location.hostname === "localhost"
 
   useEffect(() => {
     fetchHealth();
-    // Sync with backend every 10 seconds
     const syncInterval = setInterval(fetchHealth, 10000);
 
-    // Real-time counter updates every 1 second
     const ticker = setInterval(() => {
       setLiveUptime(prev => prev + 1);
       setLiveMemory(prev => prev + (Math.random() * 0.04 - 0.02));
@@ -56,7 +51,6 @@ const API_URL = window.location.hostname === "localhost"
   return (
     <div className="p-8 max-w-[1200px] mx-auto text-left animate-in fade-in duration-700">
       
-      {/* 1. HEADER */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <div className="flex items-center space-x-2 mb-1">
@@ -72,10 +66,7 @@ const API_URL = window.location.hostname === "localhost"
         </button>
       </div>
 
-      {/* 2. DYNAMIC GRID */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        
-        {/* OPERATIONAL CARD WITH LIVE WAVE */}
         <div className="md:col-span-2 bg-white/70 backdrop-blur-md p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-white flex flex-col justify-between relative overflow-hidden group">
           <div className="relative z-10">
             <div className="flex items-center space-x-2 mb-4">
@@ -100,7 +91,6 @@ const API_URL = window.location.hostname === "localhost"
                 </div>
               </div>
 
-              {/* UPTIME HISTORY TIMELINE */}
               <div className="flex items-center space-x-1.5 pt-4 border-t border-slate-100">
                 <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest mr-2">Uptime History:</span>
                 {history.map((ok, i) => (
@@ -109,7 +99,6 @@ const API_URL = window.location.hostname === "localhost"
               </div>
           </div>
           
-          {/* ANIMATED WAVE SVG */}
           <div className="absolute -right-10 -bottom-10 opacity-20 pointer-events-none group-hover:opacity-30 transition-opacity duration-1000">
             <svg width="400" height="200" viewBox="0 0 400 200">
               <defs>
@@ -131,7 +120,6 @@ const API_URL = window.location.hostname === "localhost"
           </div>
         </div>
 
-        {/* CONTINUOUS UPTIME CARD */}
         <div className="bg-gradient-to-br from-blue-600 to-cyan-500 p-8 rounded-[2.5rem] shadow-xl shadow-blue-200 text-white flex flex-col justify-between relative overflow-hidden group">
             <Clock className="absolute -right-2 -top-2 w-24 h-24 text-white/10 group-hover:rotate-12 transition-transform" />
             <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Continuous Uptime</p>
@@ -141,7 +129,6 @@ const API_URL = window.location.hostname === "localhost"
             </div>
         </div>
 
-        {/* MEMORY LOAD CARD */}
         <div className="bg-white/70 backdrop-blur-md p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-white group relative">
             <div className="flex justify-between items-start mb-6">
                 <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
@@ -156,7 +143,6 @@ const API_URL = window.location.hostname === "localhost"
             </div>
         </div>
 
-        {/* PORT PROTOCOL CARD */}
         <div className="bg-white/70 backdrop-blur-md p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-white flex items-center space-x-5 group">
             <div className="w-10 h-10 bg-cyan-50 rounded-xl flex items-center justify-center text-cyan-600 group-hover:bg-cyan-500 group-hover:text-white transition-all">
                 <Zap size={20} />
@@ -167,7 +153,6 @@ const API_URL = window.location.hostname === "localhost"
             </div>
         </div>
 
-        {/* DATABASE INTEGRITY CARD */}
         <div className="bg-white/70 backdrop-blur-md p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-white flex items-center space-x-5 group">
             <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all">
                 <Database size={20} />
@@ -179,7 +164,6 @@ const API_URL = window.location.hostname === "localhost"
         </div>
       </div>
 
-      {/* FOOTER */}
       <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
           <div className="flex items-center space-x-2">
               <Server size={12} className="text-blue-600" />

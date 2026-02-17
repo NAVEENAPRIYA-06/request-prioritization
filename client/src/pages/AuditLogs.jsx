@@ -6,13 +6,11 @@ import toast from 'react-hot-toast';
 const AuditLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+
   const fetchLogs = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/admin/audit-logs`);
+      // RESTORED: Hardcoded to local server
+      const res = await axios.get('http://localhost:5000/api/admin/audit-logs');
       setLogs(res.data);
       setLoading(false);
     } catch (err) {
@@ -45,7 +43,6 @@ const API_URL = window.location.hostname === "localhost"
         </button>
       </div>
       
-        
       {/* AUDIT TABLE CONTAINER */}
       <div className="bg-white rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-white overflow-hidden">
         {loading ? (
@@ -68,7 +65,6 @@ const API_URL = window.location.hostname === "localhost"
                 <tr key={log.id} className="hover:bg-blue-50/30 transition-colors group">
                   <td className="px-10 py-6 flex items-center space-x-3 text-xs font-bold text-slate-400 italic">
                     <Clock size={14} className="text-slate-300" />
-                    {/* FIXED: Robust Date Formatting to prevent "Invalid Date" */}
                     <span>{log.created_at ? new Date(log.created_at).toLocaleString('en-US', { 
                       hour12: true, 
                       year: 'numeric', 
@@ -91,7 +87,6 @@ const API_URL = window.location.hostname === "localhost"
                   </td>
                   
                   <td className="px-10 py-6">
-                    {/* FIXED: Vibrant Blue Badge for Action */}
                     <span className="px-4 py-1.5 bg-blue-600 text-white rounded-full text-[9px] font-black uppercase tracking-widest border border-blue-600 shadow-lg shadow-blue-100">
                       {log.action || 'SYSTEM'}
                     </span>

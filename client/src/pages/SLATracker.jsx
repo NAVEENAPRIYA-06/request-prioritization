@@ -6,11 +6,10 @@ import toast from 'react-hot-toast';
 const SLATracker = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
-  // Fetch metrics and handle auto-escalation logic from the backend
+
+  // RESTORED: Hardcoded to local server
+  const API_URL = "http://localhost:5000";
+
   const fetchSLAMetrics = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/requests/sla-tracker`);
@@ -24,12 +23,10 @@ const API_URL = window.location.hostname === "localhost"
 
   useEffect(() => {
     fetchSLAMetrics();
-    // Refresh timers and escalation checks every 60 seconds
     const interval = setInterval(fetchSLAMetrics, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // Determine visual styling based on time remaining
   const getStatusConfig = (ms) => {
     if (ms < 0) return { 
       label: 'Overdue', 
@@ -69,7 +66,6 @@ const API_URL = window.location.hostname === "localhost"
 
   return (
     <div className="p-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 max-w-[1400px] mx-auto">
-      {/* Header Section */}
       <div className="mb-12 flex justify-between items-end">
         <div>
           <h2 className="text-4xl font-black text-slate-800 tracking-tighter italic uppercase underline decoration-slate-100">SLA Intelligence</h2>
@@ -81,7 +77,6 @@ const API_URL = window.location.hostname === "localhost"
         </div>
       </div>
 
-      {/* SLA List */}
       <div className="grid grid-cols-1 gap-6">
         {requests.length > 0 ? requests.map((req) => {
           const config = getStatusConfig(req.msRemaining);
@@ -91,24 +86,19 @@ const API_URL = window.location.hostname === "localhost"
               className={`bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border-l-8 transition-all hover:scale-[1.01] flex items-center justify-between ${config.border}`}
             >
               <div className="flex items-center space-x-8">
-                {/* Status Icon */}
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${config.bg} ${config.color} shadow-inner`}>
                   {config.icon}
                 </div>
 
-                {/* Info Section */}
                 <div>
                   <div className="flex items-center space-x-3 mb-1">
                     <h4 className="text-xl font-black text-slate-800 uppercase italic tracking-tight">{req.title}</h4>
-                    
-                    {/* Priority Tag */}
                     <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
                       req.priority === 'Critical' ? 'bg-rose-100 text-rose-600 shadow-sm shadow-rose-100' : 'bg-slate-100 text-slate-500'
                     }`}>
                       {req.priority}
                     </span>
 
-                    {/* Auto-Escalation Badge */}
                     {req.autoEscalation === 'Active' && (
                       <div className="flex items-center text-[8px] font-black text-rose-600 uppercase bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-lg animate-bounce shadow-sm">
                         <Zap size={10} className="mr-1" /> Escalated by System
@@ -127,7 +117,6 @@ const API_URL = window.location.hostname === "localhost"
                 </div>
               </div>
 
-              {/* Timer Section */}
               <div className="text-right">
                 <div className={`text-4xl font-black tracking-tighter italic mb-1 ${config.color}`}>
                   {formatTime(req.msRemaining)}

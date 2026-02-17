@@ -5,16 +5,12 @@ import { Bell, Clock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react'
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const user = JSON.parse(localStorage.getItem('user'));
-// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        // Fetching user's specific requests to track changes
-        const res = await axios.get(`${API_URL}/api/requests/user/${user.id}`);
-        // Sorting by updated_at so newest changes appear first
+        // RESTORED: Hardcoded to local server
+        const res = await axios.get(`http://localhost:5000/api/requests/user/${user.id}`);
         const sorted = res.data.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
         setNotifications(sorted);
       } catch (err) {
@@ -40,7 +36,6 @@ const API_URL = window.location.hostname === "localhost"
           notifications.map((note) => (
             <div key={note.id} className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-white flex items-center justify-between group hover:scale-[1.01] transition-all">
               <div className="flex items-center space-x-8">
-                {/* Status-Based Iconography */}
                 <div className={`w-16 h-16 rounded-3xl flex items-center justify-center shadow-inner ${
                   note.status === 'Resolved' ? 'bg-emerald-50 text-emerald-500' : 
                   note.status === 'In Progress' ? 'bg-blue-50 text-blue-500 animate-pulse' : 
@@ -94,7 +89,6 @@ const API_URL = window.location.hostname === "localhost"
   );
 };
 
-// Internal Helper for Activity Icon
 const Activity = ({ size }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />

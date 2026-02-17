@@ -11,14 +11,12 @@ const HelpCenter = () => {
   const [guides, setGuides] = useState([]);
   const [selectedGuide, setSelectedGuide] = useState(null);
   const [showCommunity, setShowCommunity] = useState(false);
-// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+
   useEffect(() => {
     const fetchGuides = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/help/guides`);
+        // RESTORED: Hardcoded to local server
+        const res = await axios.get('http://localhost:5000/api/help/guides');
         setGuides(res.data);
       } catch (err) {
         console.error("Error fetching guides:", err);
@@ -33,7 +31,6 @@ const API_URL = window.location.hostname === "localhost"
     { id: 3, category: "Status", question: "How can I track my request progress?", answer: "Go to 'My Requests' to see a list of your submissions. Statuses like 'Working' or 'In Progress' indicate that an admin is actively reviewing your ticket." }
   ];
 
-  // FIX: Comprehensive Filter Logic
   const filteredFaqs = faqs.filter(f => 
     f.question.toLowerCase().includes(searchTerm.toLowerCase()) || 
     f.answer.toLowerCase().includes(searchTerm.toLowerCase())
@@ -50,7 +47,6 @@ const API_URL = window.location.hostname === "localhost"
         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-2 italic">Find answers and platform guides</p>
       </div>
 
-      {/* Search Bar */}
       <div className="relative mb-12 group">
         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#8e4585] transition-colors" size={20} />
         <input 
@@ -62,7 +58,6 @@ const API_URL = window.location.hostname === "localhost"
         />
       </div>
 
-      {/* Categorized Support Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
         {filteredGuides.map((guide) => (
           <div key={guide.id} onClick={() => setSelectedGuide(guide)}>
@@ -74,18 +69,15 @@ const API_URL = window.location.hostname === "localhost"
           </div>
         ))}
 
-        {/* Community Button */}
         <div onClick={() => setShowCommunity(true)}>
           <SupportCard icon={<MessageCircle />} title="Community" desc="Connect with members" />
         </div>
 
-        {/* Direct Support Button - Redirects to New Request */}
         <div onClick={() => navigate('/new-request')}>
           <SupportCard icon={<HelpCircle />} title="Direct Support" desc="Open a priority help ticket" />
         </div>
       </div>
 
-      {/* FAQ Accordion */}
       <div className="space-y-4">
         <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-6">Frequently Asked Questions</h3>
         {filteredFaqs.length > 0 ? filteredFaqs.map((faq) => (
@@ -111,10 +103,8 @@ const API_URL = window.location.hostname === "localhost"
         )}
       </div>
 
-      {/* Guide Modal */}
       {selectedGuide && <GuideModal guide={selectedGuide} onClose={() => setSelectedGuide(null)} />}
 
-      {/* Community Overlay */}
       {showCommunity && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6" onClick={() => setShowCommunity(false)}>
           <div className="bg-white p-12 rounded-[3.5rem] shadow-2xl max-w-lg w-full text-center animate-in zoom-in-95" onClick={e => e.stopPropagation()}>

@@ -6,22 +6,23 @@ import toast from 'react-hot-toast';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [isVisible, setIsVisible] = useState(false); // For entrance animation
+  const [isVisible, setIsVisible] = useState(false); 
   const [formData, setFormData] = useState({ 
     fullName: '', email: '', password: '', role: 'employee' 
   });
   const navigate = useNavigate();
-// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+
+  // RESTORED: Hardcoded to local server only
+  const API_URL = "http://localhost:5000";
+
   useEffect(() => {
-    setIsVisible(true); // Trigger animation on mount
+    setIsVisible(true); 
   }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
+      // Points directly to your local node server
       await axios.post(`${API_URL}/api/auth/register`, formData);
       toast.success("Account created! Welcome to the team.");
       navigate('/login');
@@ -32,7 +33,6 @@ const API_URL = window.location.hostname === "localhost"
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e293b] via-[#334155] to-[#8e4585] p-6 overflow-hidden">
-      {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"></div>
       
       <div className={`flex flex-col md:flex-row w-full max-w-4xl bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/20 transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'}`}>
@@ -90,8 +90,6 @@ const API_URL = window.location.hostname === "localhost"
                 </button>
               </div>
             </div>
-
-            
 
             <button type="submit" className="w-full py-5 bg-[#8e4585] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-purple-100 hover:bg-[#72376a] transition-all transform hover:scale-[1.01] flex items-center justify-center group mt-4">
               <span>Create Account</span>

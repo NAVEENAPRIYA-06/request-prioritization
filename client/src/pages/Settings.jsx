@@ -15,10 +15,10 @@ const Settings = () => {
 
   const [name, setName] = useState(user.name || "");
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
-// This line automatically picks the right URL
-const API_URL = window.location.hostname === "localhost" 
-  ? "http://localhost:5000" 
-  : "https://request-prioritization-production.up.railway.app";
+
+  // RESTORED: Hardcoded to local server
+  const API_URL = "http://localhost:5000";
+
   useEffect(() => {
     if (!isAdmin) {
       const fetchUserStats = async () => {
@@ -36,7 +36,6 @@ const API_URL = window.location.hostname === "localhost"
     }
   }, [user.id, isAdmin]);
 
-  // --- 1. PHOTO UPLOAD LOGIC ---
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -58,7 +57,6 @@ const API_URL = window.location.hostname === "localhost"
     }
   };
 
-  // --- 2. NAME UPDATE LOGIC ---
   const handleSaveName = async (e) => {
     e.preventDefault();
     try {
@@ -71,12 +69,12 @@ const API_URL = window.location.hostname === "localhost"
     }
   };
 
-  // --- 3. PASSWORD UPDATE LOGIC ---
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     if (passwords.new !== passwords.confirm) return toast.error("Passwords do not match");
     try {
-      await axios.put(`${API_BASE_URL}/api/auth/change-password/${user.id}`, {
+      // FIXED: Pointed to local URL
+      await axios.put(`${API_URL}/api/auth/change-password/${user.id}`, {
         currentPassword: passwords.current,
         newPassword: passwords.new
       });
@@ -94,14 +92,12 @@ const API_URL = window.location.hostname === "localhost"
         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-2 italic">Personalize your Workspace Identity</p>
       </div>
 
-      {/* Tabs */}
       <div className="flex space-x-12 mb-10 border-b border-slate-100">
         <button onClick={() => setActiveTab('profile')} className={`pb-4 text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'profile' ? `${themeColor} border-b-2 border-current` : 'text-slate-300 hover:text-slate-500'}`}>Profile</button>
         <button onClick={() => setActiveTab('security')} className={`pb-4 text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'security' ? `${themeColor} border-b-2 border-current` : 'text-slate-300 hover:text-slate-500'}`}>Security</button>
         {!isAdmin && <button onClick={() => setActiveTab('performance')} className={`pb-4 text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'performance' ? `${themeColor} border-b-2 border-current` : 'text-slate-300 hover:text-slate-500'}`}>Performance</button>}
       </div>
 
-      {/* PROFILE SECTION */}
       {activeTab === 'profile' && (
         <div className="bg-white p-12 rounded-[3.5rem] shadow-2xl shadow-slate-200/40 border border-white space-y-10 animate-in slide-in-from-bottom-4">
           <div className="flex items-center space-x-10">
@@ -125,7 +121,6 @@ const API_URL = window.location.hostname === "localhost"
         </div>
       )}
 
-      {/* SECURITY SECTION */}
       {activeTab === 'security' && (
         <div className="bg-white p-12 rounded-[3.5rem] shadow-2xl shadow-slate-200/40 border border-white animate-in slide-in-from-bottom-4 space-y-8">
           <div className="flex items-center space-x-3 text-slate-800 italic">
@@ -135,24 +130,23 @@ const API_URL = window.location.hostname === "localhost"
           <form onSubmit={handleUpdatePassword} className="space-y-6">
             <InputField label="Current Password" type="password" value={passwords.current} onChange={(e) => setPasswords({...passwords, current: e.target.value})} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <InputField label="New Password" type="password" value={passwords.new} onChange={(e) => setPasswords({...passwords, new: e.target.value})} />
-               <InputField label="Confirm Password" type="password" value={passwords.confirm} onChange={(e) => setPasswords({...passwords, confirm: e.target.value})} />
+                <InputField label="New Password" type="password" value={passwords.new} onChange={(e) => setPasswords({...passwords, new: e.target.value})} />
+                <InputField label="Confirm Password" type="password" value={passwords.confirm} onChange={(e) => setPasswords({...passwords, confirm: e.target.value})} />
             </div>
             <button type="submit" className={`w-full py-5 ${bgColor} text-white rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.3em] italic shadow-lg hover:brightness-110 transition-all`}>Update Password</button>
           </form>
         </div>
       )}
 
-      {/* PERFORMANCE SECTION */}
       {activeTab === 'performance' && !isAdmin && (
         <div className="space-y-8 animate-in slide-in-from-bottom-4">
           <div className="bg-white p-12 rounded-[3.5rem] shadow-xl shadow-slate-200/40 border border-white flex justify-between items-center">
             <div className="flex items-center space-x-6">
-               <div className="p-4 bg-emerald-50 rounded-2xl text-emerald-500"><Award size={28}/></div>
-               <div>
-                  <h4 className="text-3xl font-black text-slate-800 italic uppercase tracking-tighter leading-none">Employee Scorecard</h4>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Analytical Performance Metrics</p>
-               </div>
+                <div className="p-4 bg-emerald-50 rounded-2xl text-emerald-500"><Award size={28}/></div>
+                <div>
+                   <h4 className="text-3xl font-black text-slate-800 italic uppercase tracking-tighter leading-none">Employee Scorecard</h4>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Analytical Performance Metrics</p>
+                </div>
             </div>
             <div className={`text-[10px] font-black text-white ${bgColor} px-8 py-3 rounded-full uppercase tracking-widest shadow-xl shadow-[#8e4585]/20`}>Gold Contributor</div>
           </div>
