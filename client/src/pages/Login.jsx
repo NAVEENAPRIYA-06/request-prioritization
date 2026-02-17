@@ -11,15 +11,17 @@ const Login = () => {
   const [isVisible, setIsVisible] = useState(false); // For entrance animation
   const [formData, setFormData] = useState({ email: '', password: '' });
   const navigate = useNavigate();
+  const API_URL = "https://request-prioritization-production.up.railway.app";
 
   useEffect(() => {
     setIsVisible(true); // Trigger the animation when the component loads
   }, []);
 
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      const response = await axios.post(`${API_URL}/api/auth/login`, formData);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       toast.success(`Welcome back, ${response.data.user.name}`);
       navigate('/dashboard');
