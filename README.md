@@ -23,7 +23,7 @@ SmartService is a full-stack dashboard designed for construction and enterprise 
 ---
 
 ## 🌐 Live Demo
- [https://request-prioritization-fxkdmeg21-naveenapriya-s-projects.vercel.app](Click)
+ [https://request-prioritization-fxkdmeg21-naveenapriya-s-projects.vercel.app](https://request-prioritization-fxkdmeg21-naveenapriya-s-projects.vercel.app)
 
 
 ---
