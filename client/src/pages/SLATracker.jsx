@@ -53,8 +53,8 @@ const SLATracker = () => {
 
   const formatTime = (ms) => {
     const absoluteMs = Math.abs(ms);
-    const hours = Math.floor(absoluteMs / (1000 * 60 * 60));
-    const mins = Math.floor((absoluteMs % (1000 * 60 * 60)) / (1000 * 60));
+    const hours = Math.floor(absoluteMs / (10000 * 60 * 60));
+    const mins = Math.floor((absoluteMs % (10000 * 60 * 60)) / (10000 * 60));
     return ms < 0 ? `-${hours}h ${mins}m` : `${hours}h ${mins}m`;
   };
 
